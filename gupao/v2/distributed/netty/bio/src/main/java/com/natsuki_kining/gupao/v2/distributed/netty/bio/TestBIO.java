@@ -1,7 +1,5 @@
 package com.natsuki_kining.gupao.v2.distributed.netty.bio;
 
-import io.netty.util.internal.ThreadLocalRandom;
-
 import java.util.Random;
 
 public class TestBIO {
@@ -29,7 +27,7 @@ public class TestBIO {
                 while(true){
                     String expression = random.nextInt(10) + op[random.nextInt(4)] +
                             (random.nextInt(10)+1) + "";
-                    Clinet.send(expression);
+                    Client.send(expression);
 
                     try {
                         Thread.sleep(random.nextInt(1000));

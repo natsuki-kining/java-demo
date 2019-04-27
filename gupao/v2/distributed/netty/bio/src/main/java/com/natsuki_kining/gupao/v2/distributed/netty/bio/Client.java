@@ -8,7 +8,7 @@ import java.io.PrintWriter;
 import java.net.Socket;
 
 @Slf4j
-public class Clinet {
+public class Client {
 
     private static int DEFAULT_SERVER_PORT = 7777;
 
