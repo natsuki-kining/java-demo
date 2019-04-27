@@ -29,8 +29,8 @@ public class Client {
         try{
             socket = new Socket(ip,port);
             in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            out = new PrintWriter(socket.getOutputStream());
-            out.print(expression);
+            out = new PrintWriter(socket.getOutputStream(),true);
+            out.println(expression);
             System.out.println("客户端 结果为：" + in.readLine() );
             //log.info("客户端 结果为：" + in.readLine() );
         }catch (Exception e){

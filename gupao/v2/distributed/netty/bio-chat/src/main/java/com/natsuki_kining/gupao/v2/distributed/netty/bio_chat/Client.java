@@ -28,8 +28,8 @@ public class Client {
         try{
             socket = new Socket(ip,port);
             in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            out = new PrintWriter(socket.getOutputStream());
-            out.print(message);
+            out = new PrintWriter(socket.getOutputStream(),true);
+            out.println(message);
             System.out.println(userName+" 用户接收服务器信息：" + in.readLine() );
         }catch (Exception e){
             e.printStackTrace();

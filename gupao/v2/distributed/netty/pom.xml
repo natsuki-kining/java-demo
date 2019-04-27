@@ -14,6 +14,7 @@
     <modules>
         <module>bio</module>
         <module>bio-chat</module>
+        <module>bio-teacher-demo</module>
     </modules>
 
     <dependencies>
