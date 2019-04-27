@@ -15,6 +15,9 @@
         <module>bio</module>
         <module>bio-chat</module>
         <module>bio-teacher-demo</module>
+        <module>nio-teacher-demo</module>
+        <module>netty-teacher-demo</module>
+        <module>netty-self-demo</module>
     </modules>
 
     <dependencies>
