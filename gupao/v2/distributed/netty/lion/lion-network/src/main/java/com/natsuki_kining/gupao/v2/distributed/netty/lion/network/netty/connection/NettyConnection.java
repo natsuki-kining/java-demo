@@ -53,11 +53,13 @@ public final class NettyConnection implements Connection, ChannelFutureListener 
 
     @Override
     public ChannelFuture send(Packet packet, final ChannelFutureListener listener) {
+        //channel是激活的
         if (channel.isActive()) {
-
+            //写东西
             ChannelFuture future = channel.writeAndFlush(packet.toFrame(channel)).addListener(this);
 
             if (listener != null) {
+                //如果不是空的、将这个监听器加进去
                 future.addListener(listener);
             }
 
@@ -68,6 +70,7 @@ public final class NettyConnection implements Connection, ChannelFutureListener 
             //阻塞调用线程还是抛异常？
             //return channel.newPromise().setFailure(new RuntimeException("send data too busy"));
             if (!future.channel().eventLoop().inEventLoop()) {
+                //如果不是evenLoop所属的线程
                 future.awaitUninterruptibly(100);
             }
             return future;
@@ -108,6 +111,11 @@ public final class NettyConnection implements Connection, ChannelFutureListener 
         lastReadTime = System.currentTimeMillis();
     }
 
+    /**
+     * 当调用完成的时候
+     * @param future
+     * @throws Exception
+     */
     @Override
     public void operationComplete(ChannelFuture future) throws Exception {
         if (future.isSuccess()) {

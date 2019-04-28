@@ -49,18 +49,21 @@ public final class LionServer implements LionContext {
         monitorService = new MonitorService();
         EventBus.create(monitorService.getThreadPoolManager().getEventBusExecutor());
 
+        //session管理器
         reusableSessionManager = new ReusableSessionManager();
-
+        //消息推送中心
         pushCenter = new PushCenter(this);
-
+        //路由表的管理
         routerCenter = new RouterCenter(this);
 
+        //server包含node、可以理解为node的容器
         connectionServer = new ConnectionServer(this);
 
         websocketServer = new WebsocketServer(this);
 
         adminServer = new AdminServer(this);
 
+        //判断是否是tcp
         if (tcpGateway()) {
             gatewayServer = new GatewayServer(this);
         } else {

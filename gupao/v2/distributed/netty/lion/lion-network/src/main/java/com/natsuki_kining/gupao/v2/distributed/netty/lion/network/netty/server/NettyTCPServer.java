@@ -32,12 +32,15 @@ public abstract class NettyTCPServer extends BaseService implements Server {
 
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
+    //服务状态枚举
     public enum State {Created, Initialized, Starting, Started, Shutdown}
 
+    //原子类操作
     protected final AtomicReference<State> serverState = new AtomicReference<>(State.Created);
 
     protected final int port;
     protected final String host;
+
     protected EventLoopGroup bossGroup;
     protected EventLoopGroup workerGroup;
 

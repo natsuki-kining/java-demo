@@ -9,8 +9,11 @@ import io.netty.channel.ChannelFutureListener;
 
 
 public interface Connection {
+    //对象创建、并没有连接
     byte STATUS_NEW = 0;
+    //已连接
     byte STATUS_CONNECTED = 1;
+    //关闭连接
     byte STATUS_DISCONNECTED = 2;
 
     void init(Channel channel, boolean security);

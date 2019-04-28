@@ -39,9 +39,15 @@ public final class ConnectionServer extends NettyTCPServer {
     private GlobalChannelTrafficShapingHandler trafficShapingHandler;
     private ScheduledExecutorService trafficShapingExecutor;
     private MessageDispatcher messageDispatcher;
+    //链接管理器
     private ConnectionManager connectionManager;
+    //lion主服务
     private LionServer lionServer;
 
+    /**
+     *
+     * @param lionServer
+     */
     public ConnectionServer(LionServer lionServer) {
         super(connect_server_port, connect_server_bind_ip);
         this.lionServer = lionServer;

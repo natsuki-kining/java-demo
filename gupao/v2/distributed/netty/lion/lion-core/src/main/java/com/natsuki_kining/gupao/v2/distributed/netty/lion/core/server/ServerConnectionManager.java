@@ -24,7 +24,9 @@ import java.util.concurrent.TimeUnit;
 public final class ServerConnectionManager implements ConnectionManager {
     private final ConcurrentMap<ChannelId, ConnectionHolder> connections = new ConcurrentHashMap<>();
     private final ConnectionHolder DEFAULT = new SimpleConnectionHolder(null);
+    //是否需要心跳检查
     private final boolean heartbeatCheck;
+    //连接的持有者 创建工厂
     private final ConnectionHolderFactory holderFactory;
     private HashedWheelTimer timer;
 
@@ -35,6 +37,7 @@ public final class ServerConnectionManager implements ConnectionManager {
 
     @Override
     public void init() {
+
         if (heartbeatCheck) {
             long tickDuration = TimeUnit.SECONDS.toMillis(1);//1s 每秒钟走一步，一个心跳周期内大致走一圈
             int ticksPerWheel = (int) (CC.lion.core.max_heartbeat / tickDuration);
@@ -114,7 +117,9 @@ public final class ServerConnectionManager implements ConnectionManager {
 
     private class HeartbeatCheckTask implements ConnectionHolder, TimerTask {
 
+        //超时时间 次数
         private byte timeoutTimes = 0;
+        //需要对哪个连接进行心跳检查
         private Connection connection;
 
         private HeartbeatCheckTask(Connection connection) {
@@ -125,7 +130,9 @@ public final class ServerConnectionManager implements ConnectionManager {
         void startTimeout() {
             Connection connection = this.connection;
 
+            //不是空、可连接的状态
             if (connection != null && connection.isConnected()) {
+                //获取心跳周期的时间
                 int timeout = connection.getSessionContext().heartbeat;
                 timer.newTimeout(this, timeout, TimeUnit.MILLISECONDS);
             }
@@ -168,8 +175,13 @@ public final class ServerConnectionManager implements ConnectionManager {
         }
     }
 
-    @FunctionalInterface
+    @FunctionalInterface    //注解的接口，只能有一个 public 接口。
     private interface ConnectionHolderFactory {
+        /**
+         * 创建连接持有者
+         * @param connection 连接
+         * @return 连接持有者
+         */
         ConnectionHolder create(Connection connection);
     }
 }
