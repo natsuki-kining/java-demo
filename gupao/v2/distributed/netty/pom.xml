@@ -18,6 +18,7 @@
         <module>nio-teacher-demo</module>
         <module>netty-teacher-demo</module>
         <module>netty-self-demo</module>
+        <module>lion</module>
     </modules>
 
     <dependencies>
