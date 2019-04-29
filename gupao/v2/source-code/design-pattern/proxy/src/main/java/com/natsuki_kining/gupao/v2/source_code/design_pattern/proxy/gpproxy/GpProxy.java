@@ -45,7 +45,7 @@ public class GpProxy {
     private static String generatorJavaFile(Class<?>[] interfaces) {
         String ln = "\r\n";
         StringBuilder sb = new StringBuilder();
-        sb.append("package com.natsuki_kining.design.pattern.proxy.gpproxy;"+ln);
+        sb.append("package com.natsuki_kining.gupao.v2.source_code.design_pattern.proxy.gpproxy;"+ln);
         sb.append("import java.lang.reflect.Method;"+ln);
         for(Class clazz : interfaces){
             sb.append("import "+clazz.getName()+";"+ln);

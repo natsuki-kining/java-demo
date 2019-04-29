@@ -58,7 +58,7 @@ public class MyEnhancer {
     private String generatorJavaFile(Class superClass) {
         String ln = "\r\n";
         StringBuilder sb = new StringBuilder();
-        sb.append("package com.natsuki_kining.design.pattern.proxy.mycglib;"+ln);
+        sb.append("package com.natsuki_kining.gupao.v2.source_code.design_pattern.proxy.mycglib;"+ln);
         sb.append("import java.lang.reflect.Method;"+ln);
         sb.append("import java.lang.reflect.Constructor;"+ln);
         sb.append("import "+superClass.getName()+";"+ln);
