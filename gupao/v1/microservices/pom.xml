@@ -15,7 +15,20 @@
         <module>spring-boot-test</module>
         <module>spring-rest-demo</module>
         <module>spring-rest-teacher</module>
+        <module>spring-boot-jdbc</module>
     </modules>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-dependencies</artifactId>
+                <version>2.1.4.RELEASE</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
 
 </project>
