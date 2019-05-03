@@ -16,6 +16,8 @@
         <module>spring-rest-demo</module>
         <module>spring-rest-teacher</module>
         <module>spring-boot-jdbc</module>
+        <module>spring-boot-app</module>
+        <module>spring-boot-app-multiple-module</module>
     </modules>
 
     <dependencyManagement>
