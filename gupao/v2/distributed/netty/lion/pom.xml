@@ -5,10 +5,10 @@
     <parent>
         <artifactId>netty</artifactId>
         <groupId>com.natsuki_kining</groupId>
-        <version>1.0-SNAPSHOT</version>
+        <version>2.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-
+    <version>2.0-SNAPSHOT</version>
     <artifactId>lion</artifactId>
     <packaging>pom</packaging>
     <description>Lion消息推送系统</description>
