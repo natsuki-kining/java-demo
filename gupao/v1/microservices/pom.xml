@@ -19,6 +19,7 @@
         <module>spring-boot-app</module>
         <module>spring-boot-app-multiple-module</module>
         <module>spring-boot-bean-validation</module>
+        <module>spring-cloud</module>
     </modules>
 
     <dependencyManagement>
