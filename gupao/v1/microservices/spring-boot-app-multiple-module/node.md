@@ -1,14 +1,14 @@
-#重构spring-boot-app、改为多模块应用
-##1、修改主工程类型 jar -> pom
+# 重构spring-boot-app、改为多模块应用
+## 1、修改主工程类型 jar -> pom
 <packaging>jar</packaging> -> <packaging>pom</packaging>
-##2、新建web工程，将代码移动到web java目录下
-##3、再从web工程，独立model工程
-##4、将web工程依赖model工程
-##5、重复步骤3，独立出persistence
-##6、再从persistence添加model依赖
-##7、最终依赖关系是web依赖persistence、persistence依赖model
+## 2、新建web工程，将代码移动到web java目录下
+## 3、再从web工程，独立model工程
+## 4、将web工程依赖model工程
+## 5、重复步骤3，独立出persistence
+## 6、再从persistence添加model依赖
+## 7、最终依赖关系是web依赖persistence、persistence依赖model
 
-#构建可执行jar 或者 war
+# 构建可执行jar 或者 war
 java -jar .\web-1.0-SNAPSHOT.jar
 web-1.0-SNAPSHOT.jar中没有主清单属性
 
@@ -56,6 +56,8 @@ java.util.jar.ManiFest#getAttributes
     + Start-Class
 * 除了jar和war启动的方式，还有目录启动方式
 
+
+[node by teacher](http://git.gupaoedu.com/java-vip/xiaomage-space/tree/master/VIP%E8%AF%BE/spring-boot/lesson-1)
 
 
 
