@@ -14,13 +14,6 @@
     <packaging>pom</packaging>
 
     <modules>
-        <module>spring-boot-test</module>
-        <module>spring-rest-demo</module>
-        <module>spring-rest-teacher</module>
-        <module>spring-boot-jdbc</module>
-        <module>spring-boot-app</module>
-        <module>spring-boot-app-multiple-module</module>
-        <module>spring-boot-bean-validation</module>
         <module>spring-cloud</module>
         <module>spring-boot</module>
     </modules>
