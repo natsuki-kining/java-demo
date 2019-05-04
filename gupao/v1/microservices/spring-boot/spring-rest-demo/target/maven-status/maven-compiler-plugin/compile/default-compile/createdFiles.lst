@@ -1,0 +1,5 @@
+com\natsuki_kining\gupao\v1\microservices\spring\rest\demo\controller\PersonRestController.class
+com\natsuki_kining\gupao\v1\microservices\spring\rest\demo\domain\Person.class
+com\natsuki_kining\gupao\v1\microservices\spring\rest\demo\http\message\PropertiesPersonHttpMessageConverter.class
+com\natsuki_kining\gupao\v1\microservices\spring\rest\demo\Application.class
+com\natsuki_kining\gupao\v1\microservices\spring\rest\demo\config\WebMvcConfig.class

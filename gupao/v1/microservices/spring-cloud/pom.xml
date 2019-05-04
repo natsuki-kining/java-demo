@@ -9,13 +9,13 @@
     </parent>
 
     <version>gupao-v1-microservices-spring-cloud</version>
+    <artifactId>spring-cloud</artifactId>
     <packaging>pom</packaging>
     <modelVersion>4.0.0</modelVersion>
 
     <modules>
         <module>spring-cloud-config-client</module>
     </modules>
-    <artifactId>spring-cloud</artifactId>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
