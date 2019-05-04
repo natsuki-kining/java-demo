@@ -5,12 +5,14 @@
     <parent>
         <artifactId>source-code</artifactId>
         <groupId>com.natsuki_kining</groupId>
-        <version>1.0-SNAPSHOT</version>
+        <version>gupao-v2-source-code</version>
     </parent>
-    <modelVersion>4.0.0</modelVersion>
 
+    <version>gupao-v2-source-code-design-pattern</version>
     <artifactId>design-pattern</artifactId>
     <packaging>pom</packaging>
+    <modelVersion>4.0.0</modelVersion>
+
     <modules>
         <module>proxy</module>
     </modules>

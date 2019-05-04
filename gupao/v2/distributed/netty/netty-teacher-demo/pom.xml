@@ -5,11 +5,12 @@
     <parent>
         <artifactId>netty</artifactId>
         <groupId>com.natsuki_kining</groupId>
-        <version>2.0-SNAPSHOT</version>
+        <version>gupao-v2-distributed-netty</version>
     </parent>
-    <modelVersion>4.0.0</modelVersion>
-    <version>2.0-SNAPSHOT</version>
+
+    <version>gupao-v2-distributed-netty</version>
     <artifactId>netty-teacher-demo</artifactId>
+    <modelVersion>4.0.0</modelVersion>
 
 
 </project>

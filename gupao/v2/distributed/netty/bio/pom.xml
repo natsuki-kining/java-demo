@@ -3,12 +3,13 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <artifactId>netty</artifactId>
         <groupId>com.natsuki_kining</groupId>
-        <version>2.0-SNAPSHOT</version>
+        <artifactId>netty</artifactId>
+        <version>gupao-v2-distributed-netty</version>
     </parent>
+
+    <version>gupao-v2-distributed-netty</version>
     <modelVersion>4.0.0</modelVersion>
-    <version>2.0-SNAPSHOT</version>
     <artifactId>bio</artifactId>
 
 </project>

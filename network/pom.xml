@@ -7,7 +7,8 @@
     <groupId>com.natsuki_kining</groupId>
     <artifactId>network</artifactId>
     <packaging>pom</packaging>
-    <version>1.0-SNAPSHOT</version>
+    <version>network</version>
+
     <modules>
         <module>websocket-netty-chat</module>
     </modules>

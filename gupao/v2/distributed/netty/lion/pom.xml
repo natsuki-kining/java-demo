@@ -5,13 +5,15 @@
     <parent>
         <artifactId>netty</artifactId>
         <groupId>com.natsuki_kining</groupId>
-        <version>2.0-SNAPSHOT</version>
+        <version>gupao-v2-distributed-netty</version>
     </parent>
-    <modelVersion>4.0.0</modelVersion>
-    <version>2.0-SNAPSHOT</version>
+
+
+    <version>gupao-v2-distributed-netty-lion</version>
     <artifactId>lion</artifactId>
     <packaging>pom</packaging>
     <description>Lion消息推送系统</description>
+    <modelVersion>4.0.0</modelVersion>
 
     <modules>
         <module>lion-api</module>

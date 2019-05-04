@@ -3,13 +3,14 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <artifactId>spring-cloud</artifactId>
         <groupId>com.natsuki_kining</groupId>
-        <version>1.0-SNAPSHOT</version>
+        <artifactId>spring-cloud</artifactId>
+        <version>gupao-v1-microservices-spring-cloud</version>
     </parent>
-    <modelVersion>4.0.0</modelVersion>
-    <version>1.0-SNAPSHOT</version>
+
+    <version>gupao-v1-microservices-spring-cloud</version>
     <artifactId>spring-cloud-config-client</artifactId>
+    <modelVersion>4.0.0</modelVersion>
 
     <dependencies>
 

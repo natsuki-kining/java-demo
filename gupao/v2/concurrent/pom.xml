@@ -5,11 +5,11 @@
     <parent>
         <artifactId>v2</artifactId>
         <groupId>com.natsuki_kining</groupId>
-        <version>2.0-SNAPSHOT</version>
+        <version>gupao-v2</version>
     </parent>
-    <modelVersion>4.0.0</modelVersion>
-    <version>2.0-SNAPSHOT</version>
 
+    <version>gupao-v2-concurrent</version>
+    <modelVersion>4.0.0</modelVersion>
     <artifactId>concurrent</artifactId>
     <packaging>pom</packaging>
     <modules>
