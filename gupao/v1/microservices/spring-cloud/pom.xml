@@ -16,6 +16,9 @@
     <modules>
         <module>spring-cloud-config-client</module>
         <module>spring-cloud-config-server</module>
+        <module>spring-cloud-config-server-client</module>
+        <module>spring-cloud-eureka-server</module>
+        <module>spring-cloud-eureka-client</module>
     </modules>
 
     <properties>
@@ -54,6 +57,5 @@
             </plugin>
         </plugins>
     </build>
-
 
 </project>

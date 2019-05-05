@@ -44,10 +44,6 @@ public class PropertiesPersonHttpMessageConverter extends
                                   HttpInputMessage inputMessage)
             throws IOException, HttpMessageNotReadableException {
 
-        /**
-         * person.id = 1
-         * person.name = 小马哥
-         */
         InputStream inputStream = inputMessage.getBody();
 
         Properties properties = new Properties();

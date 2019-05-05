@@ -1,8 +1,8 @@
 
 package com.natsuki_kining.gupao.v2.distributed.netty.lion.tester.redis;
 
-import com.natsuki_kining.gupao.v2.distributed.netty.lion.cache.redis.mq.ListenerDispatcher;
-import com.natsuki_kining.gupao.v2.distributed.netty.lion.cache.redis.manager.RedisManager;
+import com.natsuki_kining.gupao.v2.distributed.netty.lion.cacher.redis.manager.RedisManager;
+import com.natsuki_kining.gupao.v2.distributed.netty.lion.cacher.redis.mq.ListenerDispatcher;
 import org.junit.Before;
 import org.junit.Test;
 

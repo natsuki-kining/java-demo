@@ -1,6 +1,6 @@
 package com.natsuki_kining.gupao.v2.distributed.netty.nio_theacher_demo.channel;
  
-import com.natsuki_kining.gupao.v2.distributed.netty.nio.buffer.Buffers;
+import com.natsuki_kining.gupao.v2.distributed.netty.nio_theacher_demo.buffer.Buffers;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -92,7 +92,7 @@ public class ClientSocketChannelDemo {
                         it.remove();
                          
                         /*通过SelectionKey获取对应的通道*/
-                        Buffers  buffers = (Buffers)key.attachment();
+                        Buffers buffers = (Buffers)key.attachment();
                         ByteBuffer readBuffer = buffers.getReadBuffer();
                         ByteBuffer writeBuffer = buffers.gerWriteBuffer();
                          

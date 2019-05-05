@@ -1,5 +1,5 @@
-E:\IT\code\intelliJIDEA\java-demo\gupao\v1\microservices\spring-rest-demo\src\main\java\com\natsuki_kining\gupao\v1\microservices\spring\rest\demo\config\WebMvcConfig.java
-E:\IT\code\intelliJIDEA\java-demo\gupao\v1\microservices\spring-rest-demo\src\main\java\com\natsuki_kining\gupao\v1\microservices\spring\rest\demo\http\message\PropertiesPersonHttpMessageConverter.java
-E:\IT\code\intelliJIDEA\java-demo\gupao\v1\microservices\spring-rest-demo\src\main\java\com\natsuki_kining\gupao\v1\microservices\spring\rest\demo\controller\PersonRestController.java
-E:\IT\code\intelliJIDEA\java-demo\gupao\v1\microservices\spring-rest-demo\src\main\java\com\natsuki_kining\gupao\v1\microservices\spring\rest\demo\domain\Person.java
-E:\IT\code\intelliJIDEA\java-demo\gupao\v1\microservices\spring-rest-demo\src\main\java\com\natsuki_kining\gupao\v1\microservices\spring\rest\demo\Application.java
+E:\IT\code\intelliJIDEA\java-demo\gupao\v1\microservices\spring-boot\spring-rest-demo\src\main\java\com\natsuki_kining\gupao\v1\microservices\spring\rest\demo\domain\Person.java
+E:\IT\code\intelliJIDEA\java-demo\gupao\v1\microservices\spring-boot\spring-rest-demo\src\main\java\com\natsuki_kining\gupao\v1\microservices\spring\rest\demo\Application.java
+E:\IT\code\intelliJIDEA\java-demo\gupao\v1\microservices\spring-boot\spring-rest-demo\src\main\java\com\natsuki_kining\gupao\v1\microservices\spring\rest\demo\controller\PersonRestController.java
+E:\IT\code\intelliJIDEA\java-demo\gupao\v1\microservices\spring-boot\spring-rest-demo\src\main\java\com\natsuki_kining\gupao\v1\microservices\spring\rest\demo\config\WebMvcConfig.java
+E:\IT\code\intelliJIDEA\java-demo\gupao\v1\microservices\spring-boot\spring-rest-demo\src\main\java\com\natsuki_kining\gupao\v1\microservices\spring\rest\demo\http\message\PropertiesPersonHttpMessageConverter.java

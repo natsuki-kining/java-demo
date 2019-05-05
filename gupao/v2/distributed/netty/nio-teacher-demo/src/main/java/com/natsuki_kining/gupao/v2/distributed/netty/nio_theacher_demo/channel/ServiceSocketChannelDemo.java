@@ -1,6 +1,6 @@
 package com.natsuki_kining.gupao.v2.distributed.netty.nio_theacher_demo.channel;
  
-import com.natsuki_kining.gupao.v2.distributed.netty.nio.buffer.Buffers;
+import com.natsuki_kining.gupao.v2.distributed.netty.nio_theacher_demo.buffer.Buffers;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;

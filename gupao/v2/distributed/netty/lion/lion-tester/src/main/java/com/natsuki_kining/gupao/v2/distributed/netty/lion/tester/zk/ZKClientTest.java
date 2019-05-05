@@ -5,7 +5,7 @@ import com.natsuki_kining.gupao.v2.distributed.netty.lion.api.spi.common.Service
 import com.natsuki_kining.gupao.v2.distributed.netty.lion.api.spi.common.ServiceRegistryFactory;
 import com.natsuki_kining.gupao.v2.distributed.netty.lion.api.srd.*;
 import com.natsuki_kining.gupao.v2.distributed.netty.lion.common.ServerNodes;
-import com.natsuki_kining.gupao.v2.distributed.netty.lion.register.zk.ZKClient;
+import com.natsuki_kining.gupao.v2.distributed.netty.lion.registion.zk.ZKClient;
 import org.junit.Test;
 
 import java.util.List;

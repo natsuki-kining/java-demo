@@ -10,7 +10,7 @@
 
     <version>gupao-v1-microservices-spring-cloud</version>
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>spring-cloud-config-server</artifactId>
+    <artifactId>spring-cloud-eureka-server</artifactId>
 
     <dependencies>
         <dependency>
@@ -19,13 +19,12 @@
         </dependency>
         <dependency>
             <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-config-server</artifactId>
+            <artifactId>spring-cloud-starter-eureka-server</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
-
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>

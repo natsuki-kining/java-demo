@@ -1,7 +1,7 @@
 
 package com.natsuki_kining.gupao.v2.distributed.netty.lion.tester.sever;
 
-import com.natsuki_kining.gupao.v2.distributed.netty.lion.bootstrap.Main;
+import com.natsuki_kining.gupao.v2.distributed.netty.lion.boot.Main;
 import org.junit.Test;
 
 import java.util.concurrent.locks.LockSupport;
