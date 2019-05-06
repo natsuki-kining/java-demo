@@ -1,0 +1,36 @@
+server:
+  port: 8000
+spring:
+  jpa:
+    generate-ddl: false
+    show-sql: true
+    hibernate:
+      ddl-auto: none
+  datasource:
+    url: jdbc:mysql://localhost:3306/spring_cloud_and_docker2
+    username: root
+    password: root
+    driver-class-name: com.mysql.jdbc.Driver
+  application:
+    name: MICROSERVICE-PROVIDER-USER
+
+logging:                                # 配置日志级别，让hibernate打印出执行的SQL
+  level:
+    root: INFO
+    org.hibernate: INFO
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+    org.hibernate.type.descriptor.sql.BasicExtractor: TRACE
+
+
+## INFO
+#info:
+#  app:
+#    name: @project.artifactId@
+#    encoding: @project.build.sourceEncoding@
+#    java:
+#      source: @java.version@
+#      target: @java.version@
+
+management:
+  security:
+    enabled: false

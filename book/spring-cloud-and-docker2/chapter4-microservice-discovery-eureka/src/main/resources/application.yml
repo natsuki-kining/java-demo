@@ -1,0 +1,8 @@
+server:
+  port: 8761                    # 指定该Eureka实例的端口
+eureka:
+  client:
+    registerWithEureka: false     #是否将自己注册到eureka上、默认是true
+    fetchRegistry: false           #是否从eureka获取注册信息，默认是true
+    serviceUrl:
+      defaultZone: http://localhost:${server.port}/eureka/
