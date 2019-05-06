@@ -20,6 +20,10 @@
         <module>chapter4-microservice-discovery-eureka-authenticating</module>
         <module>chapter4-microservice-provider-user-my-metadata</module>
         <module>chapter4-microservice-consumer-movie-understanding-metadata</module>
+        <module>chapter5-microservice-consumer-movie-ribbon</module>
+        <module>chapter5-microservice-consumer-movie-ribbon-customizing</module>
+        <module>chapter5-microservice-consumer-movie-ribbon-customizing-properties</module>
+        <module>chapter5-microservice-consumer-movie-without-eureka</module>
     </modules>
 
 
