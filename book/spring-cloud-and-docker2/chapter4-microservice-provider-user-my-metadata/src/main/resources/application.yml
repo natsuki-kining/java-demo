@@ -1,0 +1,29 @@
+server:
+  port: 8000
+spring:
+  application:
+    name: MICROSERVICE-PROVIDER-USER-MY-METADATA
+  jpa:
+    generate-ddl: false
+    show-sql: true
+    hibernate:
+      ddl-auto: none
+  datasource:
+    url: jdbc:mysql://localhost:3306/spring_cloud_and_docker2
+    username: root
+    password: root
+    driver-class-name: com.mysql.jdbc.Driver
+logging:                                # 配置日志级别，让hibernate打印出执行的SQL
+  level:
+    root: INFO
+    org.hibernate: INFO
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+    org.hibernate.type.descriptor.sql.BasicExtractor: TRACE
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka/
+  instance:
+    prefer-ip-address: true
+    metadata-map:
+      my-metadata: 我自定义的元数据       # 自定义的元数据，key/value都可以随便写。

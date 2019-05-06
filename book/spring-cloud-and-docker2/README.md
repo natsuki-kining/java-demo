@@ -28,3 +28,8 @@
 ### ②修改`eureka.client.serviceUrl.defaultZone=xxxx,xxx,xxx` 配置多个eureka server地址。
 
 ## 4、用户认证
+### ①`security.basic.enabled=true` 开启基于HTTP basic的认证
+### ②设置账号密码：`security.user.name=xxx` ,`security.user.password=xxx`。如果不设置、账号默认是user，密码随机，启动的时候会打印出来。 
+
+## 5、eureka元数据
+### `org.springframework.cloud.client.discovery.DiscoveryClient`

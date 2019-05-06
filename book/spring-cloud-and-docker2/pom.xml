@@ -17,6 +17,9 @@
         <module>chapter3-microservice-simple-consumer-movie</module>
         <module>chapter4-microservice-discovery-eureka</module>
         <module>chapter4-microservice-discovery-eureka-ha</module>
+        <module>chapter4-microservice-discovery-eureka-authenticating</module>
+        <module>chapter4-microservice-provider-user-my-metadata</module>
+        <module>chapter4-microservice-consumer-movie-understanding-metadata</module>
     </modules>
 
 

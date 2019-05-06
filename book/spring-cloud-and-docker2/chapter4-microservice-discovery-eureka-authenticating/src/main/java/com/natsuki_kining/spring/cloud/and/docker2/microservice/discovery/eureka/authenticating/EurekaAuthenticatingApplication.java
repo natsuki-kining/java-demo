@@ -1,4 +1,4 @@
-package com.natsuki_kining.spring.cloud.and.docker2.microservice.discovery.eureka;
+package com.natsuki_kining.spring.cloud.and.docker2.microservice.discovery.eureka.authenticating;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -10,8 +10,8 @@ import org.springframework.cloud.netflix.eureka.server.EnableEurekaServer;
  */
 @SpringBootApplication
 @EnableEurekaServer
-public class EurekaApplication {
+public class EurekaAuthenticatingApplication {
   public static void main(String[] args) {
-    SpringApplication.run(EurekaApplication.class, args);
+    SpringApplication.run(EurekaAuthenticatingApplication.class, args);
   }
 }
