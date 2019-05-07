@@ -1,4 +1,4 @@
 # java-demo
 
 #### 介绍
-个人练习demo
+java练习demo

@@ -12,7 +12,7 @@ spring:
     password: root
     driver-class-name: com.mysql.jdbc.Driver
   application:
-    name: microservice-provider-user
+    name: microservice-provider-user-multiple-params
 
 logging:                                # 配置日志级别，让hibernate打印出执行的SQL
   level:
