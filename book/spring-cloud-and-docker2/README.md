@@ -173,9 +173,9 @@ public class FeignConfiguration {
 }
 ```
 
-> 该不应该在主应用程序上下文的@ComponentScan中。如果不加`@Configuration`则可以放到主应用的上下文中。为了避免该类的配置被所有的`@FeignClient`共享。
+> 该不应该在主应用程序上下文的`@ComponentScan`中。如果不加`@Configuration`则可以放到主应用的上下文中。为了避免该类的配置被所有的`@FeignClient`共享。
 
-#### b、Feign接口使用`@FeignClient`的configuration属性指定配置类
+#### b、Feign接口使用`@FeignClient`的`configuration`属性指定配置类
 ``` java
 @FeignClient(name = "microservice-provider-user", configuration = FeignConfiguration.class)
 public interface UserFeignClient {
@@ -320,3 +320,165 @@ public interface UserFeignClient {
 
 ## 8、使用Feign上传文件
 > Feign官方提供的例子：http://github.com/OpenFeign/feign-form
+
+
+# 七、使用Hystrix实现微服务的容错处理
+> hystrix  
+  英 [hɪst'rɪks]  
+  美 [hɪst'rɪks]
+  
+### 1、雪崩效应
+> 雪崩效应描述的是:  
+提供者不可用导致消费者不可用，并将不可用逐渐放大的过程。
+
+> 容错机制需要实现以下两点：  
+1、为网络请求设置超时  
+2、使用断路器模式
+
+### 2、使用Hystrix实现容错
+#### ①Hystrix主要通过以下几点实现延迟和容错  
+> 1、包裹请求  
+2、跳闸机制  
+3、资源隔离  
+4、监控  
+5、回退机制  
+6、自我修复 
+  
+#### ②通用方式整合Hystrix
+* 1、添加依赖
+``` xml
+<dependency>
+    <groupId>org.springframework.cloud</groupId>
+    <artifactId>spring-cloud-starter-netflix-hystrix</artifactId>
+</dependency>
+```
+
+* 2、在启动类上添加注解`@EnableCircuitBreaker` 或者 `@EnableHystrix`,从而为项目启用断路器支持。
+
+* 3、在controller层方法上添加注解`@HystrixCommand(fallbackMethod = "findByIdFallback")` fallbackMethod指回退方法。
+> @HystrixCommand使用：https://github.com/Netflix/Hystrix/tree/master/hystrix-contrib/hystrix-javanica#configuration  
+Hystrix 属性配置：http://github.com/Netflix/Hystrix/wiki/Configuration
+  
+* 4、如果需要获取回退的原因、在`fallbackMethod`指定的方法参数上添加Throwable参数即可。
+
+* 5、如果发生的是业务异常、并不想出发fallback时、可以让业务的异常类继承 `HystrixBadRequestException`，也可以使用`@HystrixCommand`提供的`ignoreExceptions`属性。  
+  
+#### ③Hystrix断路器的状态监控与深入理解
+* 可使用断点health查看Hystrix状态
+* 请求失败、超时、被拒绝以及断路器打开时都会执行回退逻辑。
+* 当失败路达到阀值（默认是5s内20次失败），断路器就会打开。
+
+#### ④Hystrix线程隔离与传播上下文
+> 官方wiki：http://github.com/Netflix/Hystrix/wiki/Configuration#execution.isolation.strategy
+
+> Hystrix隔离策略有两种  
+1、线程隔离  
+2、信号隔离  
+  
+> THREAD(线程隔离)：使用该方式，HystrixCommand将在调用线程上执行，并发送请求受到线程池中的线程数量限制。  
+SEMAPHORE（信号量隔离）：使用该方式，HystrixCommand将在调用线程上执行，开销相对较小，并发送请求受到的信号量个数的限制。
+
+  
+#### ⑤、Feign使用Hystrix
+> spring cloud 默认已为Feign整合了Hystrix，要想为Feign打开Hys支持，只需要设置`feign.hystrix.enabled=true`
+
+* 通过Fallback Factory检查回退原因
+> 1、在配置文件中开启Feign对Hystrix的支持：`feign.hystrix.enabled=true`  
+2、UserFeignClient中注解 `@FeignClient`的`fallbackFacotry` 设置为自己编写的类  
+3、新建一个类实现FallbackFacotory，重写create 方法，方法参数上有Throwable，在此可以获取到报错信息。
+
+* 为Feign禁用Hystrix
+> 1、为指定Feign客户端禁用Hystrix，编写java配置类 该类返回一个Feign.Builder，让FeignClient的configuration指向该类。  
+2、全局禁用Hystrix：配置文件中添加 `feign.hystrix.enabled=false`
+  
+  
+## ③Hystrix的监控
+添加 spring-boot-starter-actuator  
+访问/user/1 后 再 访问/hystrix.stream 就可以查看到监控数据。
+
+### Feign项目的监控
+* 1、添加依赖 
+``` xml
+<dependency>
+    <groupId>org.springframework.cloud</groupId>
+    <artifactId>spring-cloud-starter-netflix-hystrix</artifactId>
+</dependency>
+```
+
+* 2、在启动类上加上注解`@EnableCiruitBreaker`
+
+## 4、使用Hystrix Dashboard可视化监控数据
+* 1、添加依赖
+``` xml
+<dependency>
+  <groupId>org.springframework.cloud</groupId>
+  <artifactId>spring-cloud-starter-netflix-hystrix-dashboard</artifactId>
+</dependency>
+```
+
+* 2、编写启动类、在上面添加@EnableHystrixDashboard
+``` java
+@SpringBootApplication
+@EnableHystrixDashboard
+public class HystrixDashboardApplication {
+  public static void main(String[] args) {
+    SpringApplication.run(HystrixDashboardApplication.class, args);
+  }
+}
+```
+
+## 5、使用Turbine聚合监控数据
+
+### a、使用Turbine监控多个微服务
+* 1、创建项目、添加依赖
+``` xml
+<dependency>
+    <groupId>org.springframework.cloud</groupId>
+    <artifactId>spring-cloud-starter-netflix-turbine</artifactId>
+</dependency>
+```
+
+* 2、启动类添加注解`@EnableTurbine`
+``` java
+@SpringBootApplication
+@EnableTurbine
+public class TurbineApplication {
+  public static void main(String[] args) {
+    SpringApplication.run(TurbineApplication.class, args);
+  }
+}
+```
+
+* 3、配置文件
+``` yaml
+server:
+  port: 8031
+spring:
+  application:
+    name: microservice-hystrix-turbine
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+  instance:
+    prefer-ip-address: true
+turbine:
+  appConfig: microservice-consumer-movie-ribbon-hystrix,microservice-consumer-movie-feign-hystrix-fallback-stream
+  clusterNameExpression: "'default'"
+```
+ 
+ 
+### b、使用消息中间件收集数据
+以RabbitMQ为例，先按照mq。
+* 因为RabbitMQ依赖ERlang、先安装ERlang：www.erlang.org/downloads。  
+* RabbitMQ：https://www.rabbitmq.com/install-windows.html
+
+
+
+
+# 总结：
+* Eureka实现微服务的注册与发现
+* Ribbon 实现客户端侧的负载均衡
+* Feigin实现声明式的API调用
+* Hystrix实现微服务容错处理
+
