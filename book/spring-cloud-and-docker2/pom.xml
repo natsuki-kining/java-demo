@@ -35,6 +35,9 @@
         <module>chapter7-microservice-consumer-movie-feign-hystrix-fallback-stream</module>
         <module>chapter7-microservice-hystrix-dashboard</module>
         <module>chapter7-microservice-hystrix-turbine</module>
+        <module>chapter7-microservice-consumer-movie-ribbon-hystrix-turbine-mq</module>
+        <module>chapter7-microservice-hystrix-turbine-mq</module>
+        <module>chapter7-microservice-hystrix-turbine-mq</module>
     </modules>
 
 

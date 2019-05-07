@@ -472,7 +472,15 @@ turbine:
 以RabbitMQ为例，先按照mq。
 * 因为RabbitMQ依赖ERlang、先安装ERlang：www.erlang.org/downloads。  
 * RabbitMQ：https://www.rabbitmq.com/install-windows.html
-
+* 安装完毕后、cmd 控制台切换到 sbin里面执行`rabbitmq-plugins enable rabbitmq_management`
+* 访问http://localhost:15672。默认账户密码是 guest/guest
+* 改造微服务、添加依赖
+``` xml
+<dependency>
+    <groupId>org.springframework.cloud</groupId>
+    <artifactId>spring-cloud-starter-stream-rabbit</artifactId>
+</dependency>
+```
 
 
 
