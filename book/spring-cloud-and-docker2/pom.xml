@@ -38,6 +38,9 @@
         <module>chapter7-microservice-consumer-movie-ribbon-hystrix-turbine-mq</module>
         <module>chapter7-microservice-hystrix-turbine-mq</module>
         <module>chapter7-microservice-hystrix-turbine-mq</module>
+        <module>chapter8-microservice-gateway-zuul</module>
+        <module>chapter8-microservice-file-upload</module>
+        <module>chapter8-microservice-gateway-zuul-file-upload</module>
     </modules>
 
 

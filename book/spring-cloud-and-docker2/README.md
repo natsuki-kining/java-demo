@@ -482,6 +482,314 @@ turbine:
 </dependency>
 ```
 
+# 八、使用Zuul构建微服务网关
+## 1、Zull核心
+> Zull的核心是一系列的过滤器，这些过滤器可以完成以下功能：  
+1：身份认证与安全：识别每个资源的验证要求，并拒绝那些与要求不符合的请求。  
+2：审查与监控：在边缘位置追踪有意义的数据和统计结果，从而带来精确的生产视图。  
+3：动态路由：动态的将请求路由到不同的后端集群。  
+4：压力测试：逐渐增加指向集群的流量，以了解性能。  
+5：负载分配：为每一种负载类型分配对应容量，并弃用超出限定值的请求。  
+6：静态响应处理：在边缘位置直接建立部分响应，从而避免其转发到内部集群。  
+7：多区域弹性：跨越AWS Region进行请求路由，旨在实现ELB（Elastic Load Balancing）使用多样化，以及让系统的边缘更贴近系统的使用者。
+
+## 2、编写Zuul微服务网关
+[项目：chapter8-microservice-gateway-zuul](https://gitee.com/natsuki_kining/java-demo/tree/master/book/spring-cloud-and-docker2/chapter8-microservice-gateway-zuul)
+
+* 新建项目chapter8-microservice-gateway-zuul，并添加依赖
+``` xml
+<dependencies>
+    <dependency>
+      <groupId>org.springframework.cloud</groupId>
+      <artifactId>spring-cloud-starter-netflix-zuul</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.cloud</groupId>
+      <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
+    </dependency>
+  </dependencies>
+```
+
+* 在启动类上添加注解`@EnableZuulProxy`,声明一个Zuul代理。该代理使用Ribbon来定位注册在Eureka Server中的微服务；同时，该代理还整合了Hystrix，从而实现了容错，所有经过Zuul的请求都会在Hystrix命令中执行。
+``` java
+@SpringBootApplication
+@EnableZuulProxy
+public class ZuulApplication {
+  public static void main(String[] args) {
+    SpringApplication.run(ZuulApplication.class, args);
+  }
+}
+```
+
+* 编写配置文件
+``` yaml
+server:
+  port: 8040
+spring:
+  application:
+    name: microservice-gateway-zuul
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+  instance:
+    prefer-ip-address: true
+management:
+  security:
+    enabled: false
+```
+
+> 测试一：路由规则  
+1、启动项目chapter4-microservice-discovery-eureka  
+2、启动项目chapter3-microservice-simple-provider-user  
+3、启动项目chapter5-microservice-consumer-movie-ribbon  
+4、启动项目chapter8-microservice-gateway-zuul  
+5、访问http://localhost:8040/microservice-consumer-movie-ribbon/user/1,请求会被转发到http://localhost:8010/user/1  
+6、访问http://localhost:8040/microservice-provider-user/1,请求会被转发到http://localhost:8000/1  
+
+> 测试二：负载均衡  
+1、启动项目chapter4-microservice-discovery-eureka  
+2、启动多个chapter3-microservice-simple-provider-user  
+3、启动项目chapter8-microservice-gateway-zuul  
+4、多次访问http://localhost:8040/microservice-provider-user/1
+
+> 测试三：Hystrix容错与监控
+1、启动项目chapter4-microservice-discovery-eureka  
+2、启动项目chapter3-microservice-simple-provider-user  
+3、启动项目chapter5-microservice-consumer-movie-ribbon  
+4、启动项目chapter8-microservice-gateway-zuul  
+5、启动项目chapter7-microservice-hystrix-dashboard  
+6、访问http://localhost:8040/microservice-consumer-movie-ribbon/user/1  
+7、在Hystrix Dashboard中输入http://localhost:8040/hystrix.stream,有结果说明Zuul已经整合了Hystrix。
+
+## 3、管理端点
+> 当@EnableZuulProxy与Spring Boot Actuator [ˈæktjʊeɪtə] 配合使用时，Zuul会暴露两个端点：/routes和/filters。借助这些端点，可方便、直观的查看以及管理Zuul。
+
+> 测试  
+1、启动项目chapter4-microservice-discovery-eureka  
+2、启动项目chapter3-microservice-simple-provider-user  
+3、启动项目chapter5-microservice-consumer-movie-ribbon  
+4、修改项目chapter8-microservice-gateway-zuul的配置，设置management.security.enabled = false  
+5、启动项目chapter8-microservice-gateway-zuul  
+6、访问http://localhost:8040/routes。可获取到路径映射。  
+7、访问http://localhost:8040/routes?format=details。可获得详细信息。  
+
+
+## 4、路由配置详解
+### ①自定义指定微服务的访问路径
+``` yaml
+# microservice-provider-user微服务会被映射到/user/** 路径上。
+zuul:
+    routes:
+        microservice-provider-user:/user/**
+```
+
+### ②忽略指定微服务
+``` yaml
+# 忽略aaa和bbb微服务，只代理其他服务。多个微服务直接用逗号分隔。
+zuul:
+    ingored-services:aaa,bbb
+```
+
+### ③忽略所有微服务，只路由指定微服务
+``` yaml
+# 使用'*'忽略所有微服务
+zuul:
+    ignored-services:'*' 
+    routes:
+        microservice-provider-user:/user/**     # 只代理microservice-provider-user
+```
+
+### ④同时指定微服务的serviceID和对应路径
+``` yaml
+zuul:
+    routes:
+        user-route:     #user-route只是给路由的一个名称，可以任意起名。
+            server-id:microservice-provider-user
+            path:/user/**
+```
+
+### ⑤同时指定path和url
+``` yaml
+# 这种方式的配置路由不会做为HystrixCommand执行，同时也不能使用Ribbon来负载均衡多个url。例6可以解决
+zuul:
+    routes:
+        user-route:
+            url:http:lcaohost:8000/
+            path:/user/**
+```
+
+### ⑥同时指定path和url，并不破坏Zuul的Hystrix和Ribbon的特性
+``` yaml
+zuul:
+    routes:
+        user-route:
+            service-id:microservice-provider-user
+ribbon:
+    eureka:
+        enabled:false
+microservice-provider-user:
+    ribbon:
+        listOfServers:url,url                    
+```
+
+### ⑦使用正则表达式指定Zuul的路由匹配规则
+``` java
+@Bean
+public PatternServiceRouteMapper serviceRouteMapper(){
+    return new PatternServiceRouteMapper(
+    "",""
+    );
+}
+```
+
+### ⑧路由前缀
+``` yaml
+zuul:
+    prefix:/api
+    strop-prefix:false
+    routes:
+        microservice-provider-user:/user/**
+```
+
+### ⑨忽略某些路径
+``` yaml
+zuul:
+    ignoredPatterns: /**/admin/**
+    routes:
+        microservice-provider-user: /user/**
+```
+
+### ⑩本地转发
+``` yaml
+# 访问/path-a/** 转发到 /path-b/**
+zuul:
+    routes:
+        route-name:
+            path:   /path-a/**
+            url: 
+                forward:path-b
+```
+
+### 设置日志级别为DEBUG，可查看转发的具体细节
+``` yaml
+logging:
+    level:
+        com.netflix: DUBUG
+```
+
+## 5、敏感Header设置
+> 一般来说，可在同一系统中的服务之间共享Header.不过应尽量防止让一些敏感的Header外泄。因此，在很多场景下，需要通过为路由指定一系列敏感Header列表
+``` yaml
+zuul:
+  routes:
+    microservice-provider-user:
+      path: /users/**
+      sensitiveHeaders: Cookie,Set-Cookie,Authorization
+      url: https://downstream
+```
+
+> 这样就可为users微服务指定敏感Header了。也可用zuul.sensitiveHeaders全局指定敏感Header，
+需要注意的是，如果使用zuul.routes.*.sensitiveHeaders的配置方式，会覆盖掉全局的配置。例如：
+``` yaml
+zuul
+  sensitiveHeaders: Cookie,Set-Cookie,Authorization  #默认是Cookie,Set-Cookie,Authorization
+```
+
+
+## 6、忽略Header
+> 可使用zuul.ignoredHeaders属性丢弃一些Header，
+这样设置后，Header1和Header2将不会传播到其他微服务中。
+默认情况下，zuul.ignoredHeaders是空值，但如果Spring Security在项目的classpath中，那么zuul.ignoredHeaders的默认值就是Pragma,Cache-Control,X-Frame-Options,X-Content-Type-Options,X-XSS-Protection,Expires。所以，当Spring Security在项目classpath中，同时又需要使用下游微服务的Spring Security的Header时，可以将zuul.ignoreSecurityHeaders设置为false。  
+例如：
+``` yaml
+zuul
+  ignoredHeaders: Header1，Header2
+```
+
+
+## 7、使用zuul上传文件
+* 1、文件小于1M，无需任何处理
+* 2、文件大于10M、需要为上传路径添加/zuul前缀。也可以使用zuul.servlet-path自定义前缀。
+* 3、如果zuul使用了ribbon做负载均衡，那么对于超大文件（例如500M），需要提升超时设置,否则会报超时异常，例如：
+``` yaml
+hsytrix.command.default.execution.isolation.thread.timeoutInMilliseconds: 60000
+ribbon:
+    ConnectTimeout: 3000
+    ReadTimeout: 60000
+```
+
+[项目：chapter8-microservice-file-upload](https://gitee.com/natsuki_kining/java-demo/tree/master/book/spring-cloud-and-docker2/chapter8-microservice-file-upload)
+* 1、创建项目chapter8-microservice-file-upload，并添加依赖
+``` xml
+<dependencies>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-web</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.cloud</groupId>
+      <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-actuator</artifactId>
+    </dependency>
+</dependencies>
+```
+
+* 2、在启动类上添加注解`@SpringBootApplication`和`@EnableEurekaClient`
+``` java
+@SpringBootApplication
+@EnableEurekaClient
+public class FileUploadApplication {
+  public static void main(String[] args) {
+    SpringApplication.run(FileUploadApplication.class, args);
+  }
+}
+```
+
+* 3、编写Controller
+``` java
+@RequestMapping(value = "/upload", method = RequestMethod.POST)
+  public @ResponseBody String handleFileUpload(@RequestParam(value = "file", required = true) MultipartFile file) throws IOException {
+    byte[] bytes = file.getBytes();
+    File fileToSave = new File(file.getOriginalFilename());
+    FileCopyUtils.copy(bytes, fileToSave);
+    return fileToSave.getAbsolutePath();
+  }
+```
+
+* 4、编写配置文件
+``` yaml
+server:
+  port: 8050
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka/
+  instance:
+    prefer-ip-address: true
+spring:
+  application:
+    name: microservice-file-upload
+  http:
+    multipart:
+      max-file-size: 2000Mb      # Max file size，默认1M
+      max-request-size: 2500Mb   # Max request size，默认10M
+```
+
+> 测试  
+1、启动项目chapter4-microservice-discovery-eureka  
+2、启动项目chapter8-microservice-file-upload  
+3、启动项目chapter8-microservice-gateway-zuul  
+4、测试上传文件、使用postman  
+http://locahost:8050/microservice-file-upload   可以上传小文件跟大文件
+http://locahost:8040/microservice-file-upload/upload    不支持大文件  
+http://locahost:8040/zuul/microservice-file-upload/upload   不支持大文件  
+支持大文件上传项目：[chapter8-microservice-gateway-zuul-file-upload](https://gitee.com/natsuki_kining/java-demo/tree/master/book/spring-cloud-and-docker2/chapter8-microservice-gateway-zuul-file-upload)
+
+## 8、Zuul过滤器
 
 
 # 总结：
@@ -489,4 +797,5 @@ turbine:
 * Ribbon 实现客户端侧的负载均衡
 * Feigin实现声明式的API调用
 * Hystrix实现微服务容错处理
+* Zull实现微服务网关
 
