@@ -1,10 +1,11 @@
 #idea 配置启动参数
 
 ## 1、点击项目下拉按钮后选择"Edit Configurations"
+
 ![image.png](https://gitee.com/natsuki_kining/java-demo/blob/master/book/spring-cloud-and-docker2/chapter0-files/chapter4-microservice-discovery-eureka-ha-add-application.png)
 
 ## 2、添加一个Application
-![image.png](https://gitee.com/natsuki_kining/java-demo/blob/master/book/spring-cloud-and-docker2/chapter0-files/chapter4-microservice-discovery-eureka-ha-add-application.png)
+![image.png](https://gitee.com/natsuki_kining/java-demo/blob/master/book/spring-cloud-and-docker2/chapter0-files/chapter4-microservice-discovery-eureka-ha-projects.png)
 
 ## 填入相应的值
 ![image.png](https://gitee.com/natsuki_kining/java-demo/blob/master/book/spring-cloud-and-docker2/chapter0-files/chapter4-microservice-discovery-eureka-ha-application-param.png)
