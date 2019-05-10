@@ -790,6 +790,13 @@ http://locahost:8040/zuul/microservice-file-upload/upload   不支持大文件
 支持大文件上传项目：[chapter8-microservice-gateway-zuul-file-upload](https://gitee.com/natsuki_kining/java-demo/tree/master/book/spring-cloud-and-docker2/chapter8-microservice-gateway-zuul-file-upload)
 
 ## 8、Zuul过滤器
+### 8.1 过滤器类型与请求生命周期
+> 四种标准过滤器类型：  
+> * PRE   
+> * 
+> * 
+> * 
+
 
 
 # 总结：
