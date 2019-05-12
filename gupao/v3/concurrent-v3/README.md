@@ -22,8 +22,8 @@ new Thread(new Handler(socket)).start();   //解决了r/w阻塞问题
 
 ### 1.2.3、zookeeper 进程的
 
-## 1.3 并发基础
-### 生命周期：一共六种状态
+## 1.3、并发基础
+### 1.3.1、生命周期：一共六种状态
 ``` java
 /**
  * Thread state for a thread which has not yet started.
@@ -105,6 +105,50 @@ waiting notify()、notifyall()、LockSupport。unpark() → running
 
 running sleep() → time_waiting
 
+#### 1.3.1.1 查看运行中的线程状态
+* 1、open terminal
+* 2、查看运行类的id 、到类的路劲下运行`jps`
+* 3、jstack id 查看 线程堆栈日志
+* 4、可以看得到线程当前运行的状态
+
+### 1.3.2 问题
+#### 1.3.2.1、启动线程为什么是调用start方法（start方法做了什么事情）  
+* 1、start 方法上有一个 synchronized
+* 2、start 里面有个netive方法 start0
+* 3、查看start0的方法：
+    * 1、下载hossport源码
+    * 2、[这里有个引导](http://hg.openjdk.java.net/jdk8/jdk8/jdk/file/00cd9dc3c2b5/src/share/native/java/lang/Thread.c)
+    * > static JNINativeMethod methods[] = {  
+        <font color="red">{"start0",           "()V",        (void *)&JVM_StartThread},</font>  
+        {"stop0",            "(" OBJ ")V", (void *)&JVM_StopThread},  
+        {"isAlive",          "()Z",        (void *)&JVM_IsThreadAlive},  
+        {"suspend0",         "()V",        (void *)&JVM_SuspendThread},  
+        {"resume0",          "()V",        (void *)&JVM_ResumeThread},  
+        {"setPriority0",     "(I)V",       (void *)&JVM_SetThreadPriority},  
+        {"yield",            "()V",        (void *)&JVM_Yield},  
+        {"sleep",            "(J)V",       (void *)&JVM_Sleep},  
+        {"currentThread",    "()" THD,     (void *)&JVM_CurrentThread},  
+        {"countStackFrames", "()I",        (void *)&JVM_CountStackFrames},  
+        {"interrupt0",       "()V",        (void *)&JVM_Interrupt},  
+        {"isInterrupted",    "(Z)Z",       (void *)&JVM_IsInterrupted},  
+        {"holdsLock",        "(" OBJ ")Z", (void *)&JVM_HoldsLock},  
+        {"getThreads",        "()[" THD,   (void *)&JVM_GetAllThreads},  
+        {"dumpThreads",      "([" THD ")[[" STE, (void *)&JVM_DumpThreads},  
+        };
+    * start0 是在 JVM_StopThread 里面
+    * jvm.cpp 里面可以找到
+        * new Thread → Thread::start(native_thread)
+        * java_lang_Thread::set_thread_status(((JavaThread*)thread)->threadObj(),java_lang_Thread::RUNNABLE);
+        * os::start_trhead(thread)
+        
+#### 1.3.2.2、线程的停止
+为什么不能建议使用stop
+相当于 kill -9 方法、不安全。程序可能只运行到一半、突然就关闭了
+
+建议使用：[Thread.interrupt()](https://gitee.com/natsuki_kining/java-demo/blob/master/gupao/v3/concurrent-v3/src/main/java/com/natsuki_kining/gupao/v3/concurrent-v3/interrupt/InterruptDemo.java)  
+Thread里面有一个volatile修饰的成员变量 isInterrupte  
+Thread.currentThread().isInterrupted() 默认是false  
+thread.interrupte() 设置为true  
 
 
 # 2、多线程的基本原理及挑战
@@ -167,5 +211,108 @@ for(;;){
 
 升级到重量级锁之后、没有获得锁的线程会被阻塞→blocked 状态  
 重量级锁是基于监视器实现的  
+
+
+# 3 线程安全性的原理分析
+* 初步认识volatile
+* 从硬件层面了解可见性的本质
+* 什么是JVM
+* Happens-Before规则
+
+## 3.1 volatile
+### 3.1.1 volatile
+保证可见性
+
+### 3.1.2 如何保证可见性
+保证可见  
+工具：hsdis
+加了volatile、多了一个lock的汇编指令
+
+### 3.1.3 可见性到底是什么
+* 硬件层面： 
+* jmm层面 
+
+最大化的利用CPU资源
+1.CPU增加高速缓存
+2.引入进程、线程
+3.指令优化->重排序
+
+#### 3.1.3.1 CPU高速缓存
+三种缓存：L1、L2、L3  
+L1、L2 缓存是属于CPU私有的  
+L1缓存分两种、L1d、L1r  
+L3缓存是多个CPU共享的  
+缓存量：L1<L2<L3  
+
+* 1.高速缓存会带来缓存不一致的问题
+CPU层面的解决方案
+1.总线锁
+2.缓存锁
+
+缓存一致性协议（MESI）
+#### 3.1.3.2 什么是MESI
+MESI 是基于硬件方面来实现（CPU），MESI表达的是缓存行的四种状态
+基于MESI协议可以解决缓存一致性的问题？
+
+CPU的乱序执行→重排序→可见性问题  
+CPU层面提供了指令 → 内存屏障  
+内存屏障可以用来解决可见性的问题  
+CPU层面提供了三种屏障；失效队列    
+写屏障、读屏障、全屏障 
+写屏障：store barrier
+读屏障：load barrier
+全屏障：full barrier
+
+
+valance→lock（缓存锁）→ 内存屏障→可见性  
+
+内存屏障、重排序好像和平台、硬件有关？
+而java则不需要考虑平台的差异化、java怎么处理的？  
+所以java里面有jmm 内存模型。  
+
+## 3.3 JMM内存模型
+如何解决可见性问题。
+
+场景→需求→解决方案→应用→原理  
+
+
+导致可见性的根本原因是：高速缓存、重排序  
+JMM 最核心的价值：解决了有序性和可见性  
+
+### 3.3.1 什么是JMM？
+语言级别的抽象内存模型
+
+### 3.3.2 JMM规范  
+
+JMM如何解决可见性？
+JMM提供了下面的关键字：
+volatile、synchronized、final、happens-before
+
+
+源代码→编译器的重排序→cpu层面的重排序（指令级、内存）→ 最终指向的指令。
+
+通过JMM的重排序、可以提高的CPU的利用率。
+
+不是所有的程序都会进行重排序  
+不能做重排序：
+不能改变单线程下的规则
+数据依赖规则
+
+比如：int a = 1;
+int b = a;
+
+  
+
+as-if-serial
+不管你怎么重排序、对于单个线程的执行结果不能变  
+
+
+
+
+
+
+
+
+
 
 
