@@ -1,71 +1,71 @@
 # [spring cloud 与 Docker 微服务架构实战（第2版）周立 著](https://gitee.com/itmuch/spring-cloud-docker-microservice-book-code/tree/master)
 
-# 一、微服务架构概述
+# 1、微服务架构概述
 
 
-# 二、微服务开发框架——spring cloud
+# 2、微服务开发框架——spring cloud
 
-# 三、开始使用Spring Cloud实战微服务
+# 3、开始使用Spring Cloud实战微服务
 
-> ①、项目`microservice-provider-user`使用jpa查询数据库
+> 3.1、项目`microservice-provider-user`使用jpa查询数据库
 
-> ②、项目`microservice-consumer-movie`使用RestTemplate远程调用项目`microservice-provider-user`查询数据。
+> 3.2、项目`microservice-consumer-movie`使用RestTemplate远程调用项目`microservice-provider-user`查询数据。
 
-> ③、`spring boot actuator` 提供很多监控端点、maven只需要新增`spring-boot-starter-actuator`,yam 文件设置`management.security.enabled=false`，还有细粒度设置权限。
+> 3.3、`spring boot actuator` 提供很多监控端点、maven只需要新增`spring-boot-starter-actuator`,yam 文件设置`management.security.enabled=false`，还有细粒度设置权限。
 
 
-# 四、微服务注册与发现
-## 1、服务注册
-> ①在spring cloud edgware之前、要想将微服务注册到eureka server或者其他服务发现组件上，必须在启动类上添加`@EnableEurekaClient`或`@EnableDiscoveryClient`
+# 4、微服务注册与发现
+## 4.1、服务注册
+> 4.1.1在spring cloud edgware之前、要想将微服务注册到eureka server或者其他服务发现组件上，必须在启动类上添加`@EnableEurekaClient`或`@EnableDiscoveryClient`
 
-> ②在spring cloud edgware以及更高版本中，只需要添加相关依赖、即可自动注册。如果不想注册到eureka server上，只需要设置`spring.cloud.service-registry.auto-registration.enabled=false`或者`@EnableDiscoveryClient(autoRegister=false)`即可。
+> 4.1.2在spring cloud edgware以及更高版本中，只需要添加相关依赖、即可自动注册。如果不想注册到eureka server上，只需要设置`spring.cloud.service-registry.auto-registration.enabled=false`或者`@EnableDiscoveryClient(autoRegister=false)`即可。
 
-## 2、服务集群
-> ①设置集群地址集合：`eureka.client.serviceUrl.defaultZone=xxxx,xxx,xxx`
+## 4.2、服务集群
+> 4.2.1设置集群地址集合：`eureka.client.serviceUrl.defaultZone=xxxx,xxx,xxx`
 
-> ②设置自己的hostname：`eureka.instance.hostname=xxx`
+> 4.2.2设置自己的hostname：`eureka.instance.hostname=xxx`
 
-## 3、将应用注册到eureka server 集群上
-> ①只注册到某个eureka server上也可以、因为多个eureka server之间数据会相互同步
+## 4.3、将应用注册到eureka server 集群上
+> 4.3.1只注册到某个eureka server上也可以、因为多个eureka server之间数据会相互同步
 
-> ②修改`eureka.client.serviceUrl.defaultZone=xxxx,xxx,xxx` 配置多个eureka server地址。
+> 4.3.2修改`eureka.client.serviceUrl.defaultZone=xxxx,xxx,xxx` 配置多个eureka server地址。
 
-## 4、用户认证
-> ①`security.basic.enabled=true` 开启基于HTTP basic的认证
+## 4.4、用户认证
+> 4.4.1`security.basic.enabled=true` 开启基于HTTP basic的认证
 
-> ②设置账号密码：`security.user.name=xxx` ,`security.user.password=xxx`。如果不设置、账号默认是user，密码随机，启动的时候会打印出来。 
+> 4.4.2设置账号密码：`security.user.name=xxx` ,`security.user.password=xxx`。如果不设置、账号默认是user，密码随机，启动的时候会打印出来。 
 
-## 5、eureka元数据
+## 4.5、eureka元数据
 > `org.springframework.cloud.client.discovery.DiscoveryClient`
 
 
-# 五、使用Ribbon实现客户端侧负载均衡
+# 5、使用Ribbon实现客户端侧负载均衡
 
 > ribbon  
  英[ˈrɪbən]  
  美[ˈrɪbən]
 
-## 1、为服务消费者整合ribbon
-> ①引入ribbon依赖、如果已经添加了spring-cloud-starter-netflix-ribbon、则无需再引入，因为已经包含。
+## 5.1、为服务消费者整合ribbon
+> 5.1.1引入ribbon依赖、如果已经添加了spring-cloud-starter-netflix-ribbon、则无需再引入，因为已经包含。
 
-> ②restTemplater 新增注解@LoadBalanced
+> 5.1.2restTemplater 新增注解@LoadBalanced
 
-> ③使用虚拟主机名访问 http://xxxx
+> 5.1.3使用虚拟主机名访问 http://xxxx
 
-> ④  ServiceInstance serviceInstance = this.loadBalancerClient.choose("虚拟主机名");
+> 5.1.4ServiceInstance serviceInstance = this.loadBalancerClient.choose("虚拟主机名");
 使用restTemplate.getForObject("http://xxxx")  
 loadBalancerClient.choose不能跟使用restTemplate一起使用。restTemplate实际上是一个rebbon客户端，已经包含“choose”的行为。
 
-## 2、Ribbon配置自定义
+## 5.2、Ribbon配置自定义
 
-### ①使用java代码自定义Ribbon配置
-> a、定义一个配置类，不能放到主应用程序上下文的@ComponentScan所扫描的包中，否则该类中的配置信息将被所有的@RibbonClient共享。创建这个类后返回一个实现IRule方法的Bean
+### 5.2.1使用java代码自定义Ribbon配置
+> 5.2.1.1、定义一个配置类，不能放到主应用程序上下文的@ComponentScan所扫描的包中，否则该类中的配置信息将被所有的@RibbonClient共享。创建这个类后返回一个实现IRule方法的Bean
 
-> b、在主应用程序上下文的@ComponentScan所扫描的包中创建一个类、并添加上@Configuration注解和@RibbonClient注解。  
+> 5.2.1.2、在主应用程序上下文的@ComponentScan所扫描的包中创建一个类、并添加上@Configuration注解和@RibbonClient注解。  
 @RibbonClient的configuration属性，指定Ribbon的配置类  
 @name，指定虚拟主机名
 
-### ②使用属性自定义
+### 5.2.2使用属性自定义
 使用属性自定义的方式比用java代码配置方便很多。
 ``` properties
 microservice-provider-user:
@@ -84,7 +84,7 @@ NFLoadBalancerPingClassName：配置IPing的实现类
 NIWSServerListClassName：配置ServerList的实现类  
 NIWSServerListFilterClassName：配置ServerListFilater的实现类
 
-## 3、脱离Eureka使用Ribbon
+## 5.3、脱离Eureka使用Ribbon
 修改配置文件，新增一下信息
 ``` properties
 microservice-provider-user:
@@ -101,7 +101,7 @@ clientName.ribbon.NIWSServerListClassName=com.netflix.loadbalancer.Configuration
 clientName.ribbon.listOfServers=localhost:8000,localhost:80001
 ```
 
-## 4、饥饿加载
+## 5.4、饥饿加载
 从Spring Cloud Dalston开始，我们可以配置饥饿加载
 ``` properties
 ribbon:
@@ -112,11 +112,11 @@ ribbon:
 
 这样client1,client2将在启动时就进行加载，从而提高第一次的访问速度。
 
-# 六、使用Feign实现声明试REST调用
+# 6使用Feign实现声明试REST调用
 
-## 1、为服务消费者整合Feign
+## 6.1为服务消费者整合Feign
 
-### ①添加依赖
+### 6.1.1添加依赖
 ``` xml
 <dependency>
     <groupId>org.springframework.cloud</groupId>
@@ -124,7 +124,7 @@ ribbon:
 </dependency>
 ```
 
-### ②创建Feign接口，并添加`@FeignClient`注解
+### 6.1.2创建Feign接口，并添加`@FeignClient`注解
 ``` java
 @FeignClient(name = "microservice-provider-user")
 public interface UserFeignClient {
@@ -133,7 +133,7 @@ public interface UserFeignClient {
 }
 ```
 
-### ③controller层使用feign调用
+### 6.1.3controller层使用feign调用
 ``` java
 @RestController
 public class MovieController {
@@ -147,7 +147,7 @@ public class MovieController {
 }
 ```
 
-### ④启动类添加`@EnableFeignClients`注解
+### 6.1.4启动类添加`@EnableFeignClients`注解
 ``` java
 @SpringBootApplication
 @EnableFeignClients
@@ -158,11 +158,11 @@ public class ConsumerMovieFeignApplication {
 }
 ```
 
-## 2、自定义Feign配置
+## 6.2、自定义Feign配置
 
-### ①、使用java代码自定义Feign配置
+### 6.2.1、使用java代码自定义Feign配置
 
-#### a、创建Feign配置类
+#### 6.2.1.1、创建Feign配置类
 ``` java
 @Configuration
 public class FeignConfiguration {
@@ -175,7 +175,7 @@ public class FeignConfiguration {
 
 > 该不应该在主应用程序上下文的`@ComponentScan`中。如果不加`@Configuration`则可以放到主应用的上下文中。为了避免该类的配置被所有的`@FeignClient`共享。
 
-#### b、Feign接口使用`@FeignClient`的`configuration`属性指定配置类
+#### 6.2.1.2、Feign接口使用`@FeignClient`的`configuration`属性指定配置类
 ``` java
 @FeignClient(name = "microservice-provider-user", configuration = FeignConfiguration.class)
 public interface UserFeignClient {
@@ -185,11 +185,11 @@ public interface UserFeignClient {
 ```
 > 将SpringMVC的注解改为Feigin的注解
 
-#### c、全局配置
+#### 6.2.1.3、全局配置
 > `@EnableFeignClients`为我们提供了`defaultConfiguration`属性，用来指定默认的配置类，例如:  
 `@EnableFeignClients(defaultConfiguration = DefaultRibbonConfig.class)`
 
-### ②使用属性自定义Feigin配置
+### 6.2.2使用属性自定义Feigin配置
 > 从spring cloud netflix 1.4.0开始，feign支持使用属性自定义。
 
 ``` yaml
@@ -225,9 +225,9 @@ feign:
 ```
 > 将`feignName`改为`defautl`
 
-## 3、手动创建Feign
+## 6.3、手动创建Feign
 > 某些场景下如果自定义Feign的方式满足不了需求，可使用Feign Builder API手动创建Feign
-### ①添加依赖
+### 6.3.1添加依赖
 ``` xml
 <dependency>
     <groupId>org.springframework.boot</groupId>
@@ -235,9 +235,9 @@ feign:
 </dependency>
 ```
 
-## 4、Feign支持继承
+## 6.4、Feign支持继承
 
-## 5、Feign对压缩的支持
+## 6.5、Feign对压缩的支持
 > 对请求和响应进行压缩
 ``` properties
 feign.compression.reqeust.enabled=true
@@ -251,7 +251,7 @@ feign.compression.reqeust.mime-types=text/xml,application/xml,application/json
 feign.compression.reqeust.min-request-size=2048
 ```
 
-## 6、Feign的日志
+## 6.6Feign的日志
 Logger.Level
 * NONE：不记录任何日志（默认值）
 * BASIC：仅记录请求方法、URL、响应状态码以及执行时间
@@ -281,8 +281,8 @@ logging:
         xxx.xxx.xxx.FeignClient:DEBUG
 ```
 
-## 7、使用Feign构造多参数请求
-### ①GET请求
+## 6.7、使用Feign构造多参数请求
+### 6.7.1GET请求
 * 方式一：
 ``` java
 @FeignClient(name = "microservice-provider-user")
@@ -309,7 +309,7 @@ public User get(String username,String password){
 }
 ```
 
-### ②POST请求
+### 6.7.2POST请求
 ``` java
 @FeignClient(name = "microservice-provider-user")
 public interface UserFeignClient {
@@ -318,16 +318,16 @@ public interface UserFeignClient {
 }
 ```
 
-## 8、使用Feign上传文件
+## 6.8、使用Feign上传文件
 > Feign官方提供的例子：http://github.com/OpenFeign/feign-form
 
 
-# 七、使用Hystrix实现微服务的容错处理
+# 7、使用Hystrix实现微服务的容错处理
 > hystrix  
   英 [hɪst'rɪks]  
   美 [hɪst'rɪks]
   
-### 1、雪崩效应
+## 7.1、雪崩效应
 > 雪崩效应描述的是:  
 提供者不可用导致消费者不可用，并将不可用逐渐放大的过程。
 
@@ -335,8 +335,8 @@ public interface UserFeignClient {
 1、为网络请求设置超时  
 2、使用断路器模式
 
-### 2、使用Hystrix实现容错
-#### ①Hystrix主要通过以下几点实现延迟和容错  
+## 7.2、使用Hystrix实现容错
+### 7.2.1Hystrix主要通过以下几点实现延迟和容错  
 > 1、包裹请求  
 2、跳闸机制  
 3、资源隔离  
@@ -344,8 +344,8 @@ public interface UserFeignClient {
 5、回退机制  
 6、自我修复 
   
-#### ②通用方式整合Hystrix
-* 1、添加依赖
+### 7.2.2 通用方式整合Hystrix
+#### 7.2.2.1 添加依赖
 ``` xml
 <dependency>
     <groupId>org.springframework.cloud</groupId>
@@ -353,22 +353,22 @@ public interface UserFeignClient {
 </dependency>
 ```
 
-* 2、在启动类上添加注解`@EnableCircuitBreaker` 或者 `@EnableHystrix`,从而为项目启用断路器支持。
+#### 7.2.2.2 在启动类上添加注解`@EnableCircuitBreaker` 或者 `@EnableHystrix`,从而为项目启用断路器支持。
 
-* 3、在controller层方法上添加注解`@HystrixCommand(fallbackMethod = "findByIdFallback")` fallbackMethod指回退方法。
+#### 7.2.2.3 在controller层方法上添加注解`@HystrixCommand(fallbackMethod = "findByIdFallback")` fallbackMethod指回退方法。
 > @HystrixCommand使用：https://github.com/Netflix/Hystrix/tree/master/hystrix-contrib/hystrix-javanica#configuration  
 Hystrix 属性配置：http://github.com/Netflix/Hystrix/wiki/Configuration
   
-* 4、如果需要获取回退的原因、在`fallbackMethod`指定的方法参数上添加Throwable参数即可。
+#### 7.2.2.4如果需要获取回退的原因、在`fallbackMethod`指定的方法参数上添加Throwable参数即可。
 
-* 5、如果发生的是业务异常、并不想出发fallback时、可以让业务的异常类继承 `HystrixBadRequestException`，也可以使用`@HystrixCommand`提供的`ignoreExceptions`属性。  
+#### 7.2.2.5 如果发生的是业务异常、并不想出发fallback时、可以让业务的异常类继承 `HystrixBadRequestException`，也可以使用`@HystrixCommand`提供的`ignoreExceptions`属性。  
   
-#### ③Hystrix断路器的状态监控与深入理解
+### 7.2.3 Hystrix断路器的状态监控与深入理解
 * 可使用断点health查看Hystrix状态
 * 请求失败、超时、被拒绝以及断路器打开时都会执行回退逻辑。
 * 当失败路达到阀值（默认是5s内20次失败），断路器就会打开。
 
-#### ④Hystrix线程隔离与传播上下文
+### 7.2.4 Hystrix线程隔离与传播上下文
 > 官方wiki：http://github.com/Netflix/Hystrix/wiki/Configuration#execution.isolation.strategy
 
 > Hystrix隔离策略有两种  
@@ -379,7 +379,7 @@ Hystrix 属性配置：http://github.com/Netflix/Hystrix/wiki/Configuration
 SEMAPHORE（信号量隔离）：使用该方式，HystrixCommand将在调用线程上执行，开销相对较小，并发送请求受到的信号量个数的限制。
 
   
-#### ⑤、Feign使用Hystrix
+### 7.2.5 Feign使用Hystrix
 > spring cloud 默认已为Feign整合了Hystrix，要想为Feign打开Hys支持，只需要设置`feign.hystrix.enabled=true`
 
 * 通过Fallback Factory检查回退原因
@@ -392,12 +392,12 @@ SEMAPHORE（信号量隔离）：使用该方式，HystrixCommand将在调用线
 2、全局禁用Hystrix：配置文件中添加 `feign.hystrix.enabled=false`
   
   
-## ③Hystrix的监控
+## 7.3 Hystrix的监控
 添加 spring-boot-starter-actuator  
 访问/user/1 后 再 访问/hystrix.stream 就可以查看到监控数据。
 
-### Feign项目的监控
-* 1、添加依赖 
+### 7.3.1 Feign项目的监控
+#### 7.3.1.1 添加依赖 
 ``` xml
 <dependency>
     <groupId>org.springframework.cloud</groupId>
@@ -405,10 +405,10 @@ SEMAPHORE（信号量隔离）：使用该方式，HystrixCommand将在调用线
 </dependency>
 ```
 
-* 2、在启动类上加上注解`@EnableCiruitBreaker`
+#### 7.3.1.2 在启动类上加上注解`@EnableCiruitBreaker`
 
-## 4、使用Hystrix Dashboard可视化监控数据
-* 1、添加依赖
+## 7.4 使用Hystrix Dashboard可视化监控数据
+### 7.4.1 添加依赖
 ``` xml
 <dependency>
   <groupId>org.springframework.cloud</groupId>
@@ -416,7 +416,7 @@ SEMAPHORE（信号量隔离）：使用该方式，HystrixCommand将在调用线
 </dependency>
 ```
 
-* 2、编写启动类、在上面添加@EnableHystrixDashboard
+### 7.4.2 编写启动类、在上面添加@EnableHystrixDashboard
 ``` java
 @SpringBootApplication
 @EnableHystrixDashboard
@@ -427,10 +427,10 @@ public class HystrixDashboardApplication {
 }
 ```
 
-## 5、使用Turbine聚合监控数据
+## 7.5 使用Turbine聚合监控数据
 
-### a、使用Turbine监控多个微服务
-* 1、创建项目、添加依赖
+### 7.5.1 使用Turbine监控多个微服务
+#### 7.5.1.1 创建项目、添加依赖
 ``` xml
 <dependency>
     <groupId>org.springframework.cloud</groupId>
@@ -438,7 +438,7 @@ public class HystrixDashboardApplication {
 </dependency>
 ```
 
-* 2、启动类添加注解`@EnableTurbine`
+#### 7.5.1.2 启动类添加注解`@EnableTurbine`
 ``` java
 @SpringBootApplication
 @EnableTurbine
@@ -449,7 +449,7 @@ public class TurbineApplication {
 }
 ```
 
-* 3、配置文件
+#### 7.5.1.3 配置文件
 ``` yaml
 server:
   port: 8031
@@ -468,7 +468,7 @@ turbine:
 ```
  
  
-### b、使用消息中间件收集数据
+### 7.5.2 使用消息中间件收集数据
 以RabbitMQ为例，先按照mq。
 * 因为RabbitMQ依赖ERlang、先安装ERlang：www.erlang.org/downloads。  
 * RabbitMQ：https://www.rabbitmq.com/install-windows.html
@@ -482,8 +482,8 @@ turbine:
 </dependency>
 ```
 
-# 八、使用Zuul构建微服务网关
-## 1、Zull核心
+# 8 使用Zuul构建微服务网关
+## 8.1 Zull核心
 > Zull的核心是一系列的过滤器，这些过滤器可以完成以下功能：  
 1：身份认证与安全：识别每个资源的验证要求，并拒绝那些与要求不符合的请求。  
 2：审查与监控：在边缘位置追踪有意义的数据和统计结果，从而带来精确的生产视图。  
@@ -493,7 +493,7 @@ turbine:
 6：静态响应处理：在边缘位置直接建立部分响应，从而避免其转发到内部集群。  
 7：多区域弹性：跨越AWS Region进行请求路由，旨在实现ELB（Elastic Load Balancing）使用多样化，以及让系统的边缘更贴近系统的使用者。
 
-## 2、编写Zuul微服务网关
+## 8.2 编写Zuul微服务网关
 [项目：chapter8-microservice-gateway-zuul](https://gitee.com/natsuki_kining/java-demo/tree/master/book/spring-cloud-and-docker2/chapter8-microservice-gateway-zuul)
 
 * 新建项目chapter8-microservice-gateway-zuul，并添加依赖
@@ -562,7 +562,7 @@ management:
 6、访问http://localhost:8040/microservice-consumer-movie-ribbon/user/1  
 7、在Hystrix Dashboard中输入http://localhost:8040/hystrix.stream,有结果说明Zuul已经整合了Hystrix。
 
-## 3、管理端点
+## 8.3 管理端点
 > 当@EnableZuulProxy与Spring Boot Actuator [ˈæktjʊeɪtə] 配合使用时，Zuul会暴露两个端点：/routes和/filters。借助这些端点，可方便、直观的查看以及管理Zuul。
 
 > 测试  
@@ -575,8 +575,8 @@ management:
 7、访问http://localhost:8040/routes?format=details。可获得详细信息。  
 
 
-## 4、路由配置详解
-### ①自定义指定微服务的访问路径
+## 8.4 路由配置详解
+### 8.4.1 自定义指定微服务的访问路径
 ``` yaml
 # microservice-provider-user微服务会被映射到/user/** 路径上。
 zuul:
@@ -584,14 +584,14 @@ zuul:
         microservice-provider-user:/user/**
 ```
 
-### ②忽略指定微服务
+### 8.4.2 忽略指定微服务
 ``` yaml
 # 忽略aaa和bbb微服务，只代理其他服务。多个微服务直接用逗号分隔。
 zuul:
     ingored-services:aaa,bbb
 ```
 
-### ③忽略所有微服务，只路由指定微服务
+### 8.4.3 忽略所有微服务，只路由指定微服务
 ``` yaml
 # 使用'*'忽略所有微服务
 zuul:
@@ -600,7 +600,7 @@ zuul:
         microservice-provider-user:/user/**     # 只代理microservice-provider-user
 ```
 
-### ④同时指定微服务的serviceID和对应路径
+### 8.4.4 同时指定微服务的serviceID和对应路径
 ``` yaml
 zuul:
     routes:
@@ -609,7 +609,7 @@ zuul:
             path:/user/**
 ```
 
-### ⑤同时指定path和url
+### 8.4.5 同时指定path和url
 ``` yaml
 # 这种方式的配置路由不会做为HystrixCommand执行，同时也不能使用Ribbon来负载均衡多个url。例6可以解决
 zuul:
@@ -619,7 +619,7 @@ zuul:
             path:/user/**
 ```
 
-### ⑥同时指定path和url，并不破坏Zuul的Hystrix和Ribbon的特性
+### 8.4.6 同时指定path和url，并不破坏Zuul的Hystrix和Ribbon的特性
 ``` yaml
 zuul:
     routes:
@@ -633,7 +633,7 @@ microservice-provider-user:
         listOfServers:url,url                    
 ```
 
-### ⑦使用正则表达式指定Zuul的路由匹配规则
+### 8.4.7 使用正则表达式指定Zuul的路由匹配规则
 ``` java
 @Bean
 public PatternServiceRouteMapper serviceRouteMapper(){
@@ -643,7 +643,7 @@ public PatternServiceRouteMapper serviceRouteMapper(){
 }
 ```
 
-### ⑧路由前缀
+### 8.4.8 路由前缀
 ``` yaml
 zuul:
     prefix:/api
@@ -652,7 +652,7 @@ zuul:
         microservice-provider-user:/user/**
 ```
 
-### ⑨忽略某些路径
+### 8.4.9 忽略某些路径
 ``` yaml
 zuul:
     ignoredPatterns: /**/admin/**
@@ -660,7 +660,7 @@ zuul:
         microservice-provider-user: /user/**
 ```
 
-### ⑩本地转发
+### 8.4.10 本地转发
 ``` yaml
 # 访问/path-a/** 转发到 /path-b/**
 zuul:
@@ -671,14 +671,14 @@ zuul:
                 forward:path-b
 ```
 
-### 设置日志级别为DEBUG，可查看转发的具体细节
+### 8.4.11 设置日志级别为DEBUG，可查看转发的具体细节
 ``` yaml
 logging:
     level:
         com.netflix: DUBUG
 ```
 
-## 5、敏感Header设置
+## 8.5 敏感Header设置
 > 一般来说，可在同一系统中的服务之间共享Header.不过应尽量防止让一些敏感的Header外泄。因此，在很多场景下，需要通过为路由指定一系列敏感Header列表
 ``` yaml
 zuul:
@@ -697,7 +697,7 @@ zuul
 ```
 
 
-## 6、忽略Header
+## 8.6 忽略Header
 > 可使用zuul.ignoredHeaders属性丢弃一些Header，
 这样设置后，Header1和Header2将不会传播到其他微服务中。
 默认情况下，zuul.ignoredHeaders是空值，但如果Spring Security在项目的classpath中，那么zuul.ignoredHeaders的默认值就是Pragma,Cache-Control,X-Frame-Options,X-Content-Type-Options,X-XSS-Protection,Expires。所以，当Spring Security在项目classpath中，同时又需要使用下游微服务的Spring Security的Header时，可以将zuul.ignoreSecurityHeaders设置为false。  
@@ -708,10 +708,10 @@ zuul
 ```
 
 
-## 7、使用zuul上传文件
-* 1、文件小于1M，无需任何处理
-* 2、文件大于10M、需要为上传路径添加/zuul前缀。也可以使用zuul.servlet-path自定义前缀。
-* 3、如果zuul使用了ribbon做负载均衡，那么对于超大文件（例如500M），需要提升超时设置,否则会报超时异常，例如：
+## 8.7 使用zuul上传文件
+### 8.7.1 文件小于1M，无需任何处理
+### 8.7.2 文件大于10M、需要为上传路径添加/zuul前缀。也可以使用zuul.servlet-path自定义前缀。
+### 8.7.3 如果zuul使用了ribbon做负载均衡，那么对于超大文件（例如500M），需要提升超时设置,否则会报超时异常，例如：
 ``` yaml
 hsytrix.command.default.execution.isolation.thread.timeoutInMilliseconds: 60000
 ribbon:
@@ -720,7 +720,7 @@ ribbon:
 ```
 
 [项目：chapter8-microservice-file-upload](https://gitee.com/natsuki_kining/java-demo/tree/master/book/spring-cloud-and-docker2/chapter8-microservice-file-upload)
-* 1、创建项目chapter8-microservice-file-upload，并添加依赖
+#### 8.7.3.1 创建项目chapter8-microservice-file-upload，并添加依赖
 ``` xml
 <dependencies>
     <dependency>
@@ -738,7 +738,7 @@ ribbon:
 </dependencies>
 ```
 
-* 2、在启动类上添加注解`@SpringBootApplication`和`@EnableEurekaClient`
+#### 8.7.3.2 在启动类上添加注解`@SpringBootApplication`和`@EnableEurekaClient`
 ``` java
 @SpringBootApplication
 @EnableEurekaClient
@@ -749,7 +749,7 @@ public class FileUploadApplication {
 }
 ```
 
-* 3、编写Controller
+#### 8.7.3.3 编写Controller
 ``` java
 @RequestMapping(value = "/upload", method = RequestMethod.POST)
   public @ResponseBody String handleFileUpload(@RequestParam(value = "file", required = true) MultipartFile file) throws IOException {
@@ -760,7 +760,7 @@ public class FileUploadApplication {
   }
 ```
 
-* 4、编写配置文件
+#### 8.7.3.4 编写配置文件
 ``` yaml
 server:
   port: 8050
@@ -789,8 +789,8 @@ http://locahost:8040/microservice-file-upload/upload    不支持大文件
 http://locahost:8040/zuul/microservice-file-upload/upload   不支持大文件  
 支持大文件上传项目：[chapter8-microservice-gateway-zuul-file-upload](https://gitee.com/natsuki_kining/java-demo/tree/master/book/spring-cloud-and-docker2/chapter8-microservice-gateway-zuul-file-upload)
 
-## 8、Zuul过滤器
-### 8.1 过滤器类型与请求生命周期
+## 8.8 Zuul过滤器
+### 8.8.1 过滤器类型与请求生命周期
 > 四种标准过滤器类型：  
 > * PRE   
 > * 
