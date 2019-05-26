@@ -309,7 +309,12 @@ as-if-serial
 
 
 
+# 4 [JUC系列]Lock的基本使用及原理分析
+juc：并发包 java util concurrent
 
+synchronized和TeentrantLock 都支持重入。
+
+AQS
 
 
 
