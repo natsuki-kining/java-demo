@@ -3,19 +3,16 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
+        <artifactId>v3</artifactId>
         <groupId>com.natsuki_kining</groupId>
-        <artifactId>v2</artifactId>
-        <version>gupao-v2</version>
+        <version>gupao-v3</version>
     </parent>
-
-    <version>gupao-v2-distributed</version>
-    <artifactId>distributed</artifactId>
-    <packaging>pom</packaging>
     <modelVersion>4.0.0</modelVersion>
 
+    <artifactId>netty-v3</artifactId>
+    <packaging>pom</packaging>
     <modules>
-        <module>netty</module>
-        <module>rmi</module>
+        <module>io-v3</module>
     </modules>
 
 

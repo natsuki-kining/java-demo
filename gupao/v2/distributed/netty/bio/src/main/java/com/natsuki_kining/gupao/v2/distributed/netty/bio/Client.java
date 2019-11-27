@@ -20,7 +20,7 @@ public class Client {
 
     private static void send(String ip, int port, String expression) {
         System.out.println("客户端 算术表达式为："+expression);
-        //log.info("客户端 算术表达式为："+expression);
+        log.info("客户端 算术表达式为："+expression);
 
         Socket socket = null;
         BufferedReader in = null;

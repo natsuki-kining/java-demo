@@ -18,6 +18,8 @@
         <module>source-code</module>
         <module>concurrent</module>
         <module>engineering-v2</module>
+        <module>project-action</module>
+        <module>microDevOps-v2</module>
     </modules>
 
 

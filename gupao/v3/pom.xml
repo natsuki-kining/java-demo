@@ -13,6 +13,7 @@
     <version>gupao-v3</version>
     <modules>
         <module>concurrent-v3</module>
+        <module>netty-v3</module>
     </modules>
     <artifactId>v3</artifactId>
 
