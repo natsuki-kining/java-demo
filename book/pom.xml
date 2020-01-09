@@ -10,6 +10,7 @@
     <version>book</version>
     <modules>
         <module>spring-cloud-and-docker2</module>
+        <module>the-beauty-of-java-concurrency-programming</module>
     </modules>
 
     <properties>
