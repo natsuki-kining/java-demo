@@ -1,0 +1,15 @@
+# idea
+.idea
+*.iml
+/.metadata/
+*/build/tmp/
+*/out/production/
+**/target/
+
+# gradle
+.gradle
+build
+gradle
+gradlew
+gradlew.bat
+out
