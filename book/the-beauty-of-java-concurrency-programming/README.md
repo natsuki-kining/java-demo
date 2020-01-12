@@ -126,8 +126,31 @@
 
 ## 第1章 并发编程线程基础
 ### 1.1 什么是线程
+线程是进程中的一个实体，线程本身不会独立存在。  
+进程是代码在数据集合上的一次运行活动，是系统进行资源分配和调度的基本单位  
+线程则是进程的一个执行路径  
+一个进程中至少有个一个进程，进程中的多个线程共享进程资源。  
+
 ### 1.2 线程的创建与运行
+代码：`com.natsuki_kining.book.beauty.concurrency.part1.chapter1.Demo1_2_*`    
+
+Java中有三种创建方式  
+* 实现Runable接口的run方法
+* 继承Thread类并重写run方法
+* 使用FutureTask方式
+
+
+* 小结
+使用继承方式的好处是方便参，可以在子类里面添加成员变量，通过set方法设置参数或者通过构造函数进行传递，  
+而如果使用Runnable方式，则只能使用主线程里面被声明为final的变量。  
+不好的地方是Java不支持多继承，如果继承Thead类，那么子类不能再继承其他类，  
+而Runnable则没有这个限制。  
+前两种方式都没办法拿到任务的返回结果，但是FutureTask可以。
+
 ### 1.3 线程通知与等待
+代码：`com.natsuki_kining.book.beauty.concurrency.part1.chapter1.Demo1_3_*`    
+
+
 ### 1.4 等待线程执行终止的join方法
 ### 1.5 让线程睡眠的sleep方法
 ### 1.6 让出CPU执行权的yield方法
