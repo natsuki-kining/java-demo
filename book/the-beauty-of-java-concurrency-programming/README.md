@@ -148,8 +148,18 @@ Java中有三种创建方式
 前两种方式都没办法拿到任务的返回结果，但是FutureTask可以。
 
 ### 1.3 线程通知与等待
-代码：`com.natsuki_kining.book.beauty.concurrency.part1.chapter1.Demo1_3_*`    
+代码：`com.natsuki_kining.book.beauty.concurrency.part1.chapter1.Demo1_3_*`   
 
+#### 1.4 wait() 函数 
+一个线程调用共享变量wait时，该调用线程会被阻塞挂起。  
+如果调用wait方法的线程没有事先获取该对象的监视器锁，则调用wait方法时线程会抛出IllegalMonitorStateException异常。  
+线程挂起遇到下面之一才会返回：  
+* 其他线程调用了该共享对象的notify或者notifyAll
+* 其他线程调用了该线程的interrupt方法，该线程抛出InterruptedException异常返回。
+
+##### 虚假唤醒
+一个线程可以从挂起状态变为可运行状态，即使该线程没有被其他线程调用notify、notifyAll方法进行通知，或者中断，或者等待超时，这就是所谓的虚假唤醒。  
+解决的方法就是不停的去测试该线程被唤醒的条件是否满足，不满足则继续等待。也就是一个循环中调用wait方法进行防范。退出循环的条件是满足了唤醒该线程的条件。  
 
 ### 1.4 等待线程执行终止的join方法
 ### 1.5 让线程睡眠的sleep方法
