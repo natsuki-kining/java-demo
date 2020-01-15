@@ -150,7 +150,7 @@ Java中有三种创建方式
 ### 1.3 线程通知与等待
 代码：`com.natsuki_kining.book.beauty.concurrency.part1.chapter1.Demo1_3_*`   
 
-#### 1.4 wait() 函数 
+#### 1.3.1 wait() 函数 
 一个线程调用共享变量wait时，该调用线程会被阻塞挂起。  
 如果调用wait方法的线程没有事先获取该对象的监视器锁，则调用wait方法时线程会抛出IllegalMonitorStateException异常。  
 线程挂起遇到下面之一才会返回：  
@@ -161,9 +161,56 @@ Java中有三种创建方式
 一个线程可以从挂起状态变为可运行状态，即使该线程没有被其他线程调用notify、notifyAll方法进行通知，或者中断，或者等待超时，这就是所谓的虚假唤醒。  
 解决的方法就是不停的去测试该线程被唤醒的条件是否满足，不满足则继续等待。也就是一个循环中调用wait方法进行防范。退出循环的条件是满足了唤醒该线程的条件。  
 
+* 当前线程调用共享变量的wait方法后只会释放当前共享变量上的锁，如果当前线程还持有其他共享变量的锁，则这些锁是不会被释放的。例子：com.natsuki_kining.book.beauty.concurrency.part1.chapter1.Demo1_3_Lock  
+    
+    
+#### 1.3.2 wait(long timeout) 函数
+线程挂起之后没有在指定的时间timeout内被其他线程调用该共享变量的notify或者notifyAll方法唤醒，则会超时返回。  
+如果将timeout设置为0则和wait方法效果一样。如果传一个负的，则会抛出IllegalArgumentException异常。   
+ 
+#### 1.3.3 wait(long timeout，int nanos) 函数
+只在nanos>0时才是参数timeout递增1 
+```java
+public final void wait(long timeout,int nanos){
+    if(timeout > 0){
+        timeout++;
+    }
+    wait(timeout);
+}
+```
+#### 1.3.4 notify() 函数
+一个线程调用共享对象的notify方法后，会唤醒一个在该共享变量上调用wait系列方法后被挂起的线程。  
+一个共享变量上可能会有多个线程在等待，具体唤醒哪个等待的线程是随机的。  
+
+#### 1.3.5 notifyAll() 函数
+代码：com.natsuki_kining.book.beauty.concurrency.part1.chapter1.Demo1_5_notify*
+唤醒所有在该共享变量上由于调用wait系列的方法而被挂起的线程。
+
+ 
+
 ### 1.4 等待线程执行终止的join方法
+
+等待线程完成后才能继续往下执行。  
+使用场景：比如多个线程加载资源，需要等待多个线程全部加载完毕再汇总处理。
+
+* 和wait的区别
+    * wait Object 类中的方法
+    * join Thread 类中的方法
+    * join 是无参返回值为void的方法
+
+如果 线程A调用了线程B的join方法后会被堵塞，当其他线程调用了线程A的interrupt方法中断线程A时，线程A会抛出异常InterruptedException异常而返回。  
+
+
 ### 1.5 让线程睡眠的sleep方法
+当一个执行中的线程调用了Thread的sleep方法后，调用线程会暂时让出指定时间的执行权，也就是在这个期间不参与CPU的调度，但是该线程所拥有的监视器资源，比如锁还是持有不让出的。  
+指定的睡眠时间到了后该函数会正常返回，线程就处于就绪状态，然后参与CPU的调度，获取CPU资源后就可以继续运行了。
+
 ### 1.6 让出CPU执行权的yield方法
+当一个线程调用yield方法是，实际就是在暗示线程调度器当前的线程请求让出自己的CPU使用，但是线程调度器可以无条件忽略这个暗示。  
+操作系统是为每个线程分配高一个时间片来占有CPU的，正常情况下当一个线程把分配给自己的时间片使用完后，线程调度器才会进行下一轮的线程调度，而当一个线程调用了Thread类的静态方法yield时，是在告诉线程调度器自己占有的时间片中还没有使用完的部分自己不想使用了，暗示线程调度器现在就可以进行下一轮的线程调度。  
+
+
+
 ### 1.7 线程中断
 ### 1.8 理解线程上下文切换
 ### 1.9 线程死锁
