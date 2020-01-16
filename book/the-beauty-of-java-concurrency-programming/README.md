@@ -170,7 +170,7 @@ Java中有三种创建方式
  
 #### 1.3.3 wait(long timeout，int nanos) 函数
 只在nanos>0时才是参数timeout递增1 
-```java
+```
 public final void wait(long timeout,int nanos){
     if(timeout > 0){
         timeout++;
@@ -214,6 +214,27 @@ public final void wait(long timeout,int nanos){
     * 调用yield方法时，线程只是让出自己剩余的时间片，并没有阻塞挂起，而是处于就绪状态，线程调度器下一次调度时就有可能调度到当前线程执行。
 
 ### 1.7 线程中断
+java的线程中断是一种线程间的协作模式，通过设置线程的中断标志并不能直接终止该线程的执行，而是被中断的线程根据中断状态自行处理。
+* void interrupt():中断线程
+* boolean isInterrupted():检测当前线程是否被中断，如果是返回true，否则返回false。
+* boolean interrupted(): 与isInterrupted不同的是，该方法如果发现当前线程被中断，则会清除中断标志，并且该方法是static方法，可以通过Thread类直接调用。
+
+> 使用Interrupted优雅的退出线程
+```
+public void run(){
+    try{
+        //退出条件
+        while(!Thread.currentThread.isInterrupted() && more work to do){
+            // do more work
+        }
+    }catch(InterruptedException e){
+    
+    }finally{
+    
+    }
+}
+```
+
 ### 1.8 理解线程上下文切换
 ### 1.9 线程死锁
 ### 1.10 守护线程与用户线程

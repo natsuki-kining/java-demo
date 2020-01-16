@@ -6,7 +6,7 @@ package com.natsuki_kining.book.beauty.concurrency.part1.chapter1;
  * @Author : natsuki_kining
  * @Date : 2020/1/15 22:56
  */
-public class Demo1_3_notify {
+public class Demo1_3_Notify {
 
     private static volatile Object resourceA = new Object();
 

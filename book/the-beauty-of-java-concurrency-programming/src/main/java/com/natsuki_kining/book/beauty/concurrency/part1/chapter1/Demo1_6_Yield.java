@@ -7,9 +7,9 @@ package com.natsuki_kining.book.beauty.concurrency.part1.chapter1;
  * @Author : natsuki_kining
  * @Date : 2020/1/15 23:53
  */
-public class Demo1_6_yield implements Runnable{
+public class Demo1_6_Yield implements Runnable{
 
-    Demo1_6_yield(){
+    Demo1_6_Yield(){
         //创建并启动线程
         new Thread(this).start();
     }
@@ -28,8 +28,8 @@ public class Demo1_6_yield implements Runnable{
     }
 
     public static void main(String[] args) {
-        new Demo1_6_yield();
-        new Demo1_6_yield();
-        new Demo1_6_yield();
+        new Demo1_6_Yield();
+        new Demo1_6_Yield();
+        new Demo1_6_Yield();
     }
 }

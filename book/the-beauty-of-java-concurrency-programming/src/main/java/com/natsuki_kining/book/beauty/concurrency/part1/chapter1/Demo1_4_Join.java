@@ -6,7 +6,7 @@ package com.natsuki_kining.book.beauty.concurrency.part1.chapter1;
  * @Author : natsuki_kining
  * @Date : 2020/1/15 23:20
  */
-public class Demo1_4_join {
+public class Demo1_4_Join {
 
     public static void main(String[] args) throws InterruptedException {
         Thread threadOne = new Thread(() -> {

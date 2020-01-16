@@ -9,7 +9,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * @Author : natsuki_kining
  * @Date : 2020/1/15 23:34
  */
-public class Demo1_5_sleep {
+public class Demo1_5_Sleep {
 
     //创建独占锁
     private static final Lock lock = new ReentrantLock();

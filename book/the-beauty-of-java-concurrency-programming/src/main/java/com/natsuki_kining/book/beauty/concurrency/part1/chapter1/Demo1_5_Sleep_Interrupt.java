@@ -9,7 +9,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * @Author : natsuki_kining
  * @Date : 2020/1/15 23:34
  */
-public class Demo1_5_sleep_interrupt {
+public class Demo1_5_Sleep_Interrupt {
 
     public static void main(String[] args) throws InterruptedException {
         Thread threadA = new Thread(() -> {
