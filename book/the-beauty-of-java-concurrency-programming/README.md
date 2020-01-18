@@ -236,9 +236,234 @@ public void run(){
 ```
 
 ### 1.8 理解线程上下文切换
+在多线程编程中，线程个数一般大于CPU个数，而每个CPU同一时刻只能被一个线程使用，为了让用户感觉多个线程是同时执行的，CPU资源的分配采用了时间片轮转的策略，也就是给每个线程分配一个时间片，线程在时间片内占用CPU执行任务。  
+当前线程使用完时间片后，就会处于就绪状态并让出CPU让其他线程占用，这就是线程上下文切换，从当前线程的上下文切换到了其他线程。  
+切换线程上下文时需要保持当前线程的执行现场，当再次执行时根据保存的执行现场信息恢复执行现场。  
+线程上下文切换时机有：当线程的CPU时间片使用完处于就绪状态时，当前线程被其他线程中断时。  
+
 ### 1.9 线程死锁
+#### 1.9.1 产生死锁的四个条件：
+* 互斥条件：一个资源同时只由一个线程占用。
+* 请求并持有条件：持有多个资源有提出已被占用的资源请求，会被阻塞挂起，又不释放自己持有的资源。
+* 不可剥夺条件：线程获取都的资源在自己使用完之前都不能被其他线程抢占，只有在自己使用完毕后才由自己释放该资源。
+* 环路等待条件  发送死锁时，必然存在一个线程一资源的环形链。
+
+#### 1.9.2 如何避免线程死锁
+避免死锁，只需要破坏必要条件中的一个即可。目前只有请求并持有和环路等待条件是可以被破坏的。
+
 ### 1.10 守护线程与用户线程
+java中的线程分两类：
+* daemon线程（守护线程）：例如垃圾回收线程
+* user线程（用户线程）：例如main函数所在的线程
+区别：当最后一个非守护线程结束时，jvm会正常退出，而不管当前是否有守护线程。
+
+
+
 ### 1.11 ThreadLocal
+ThreadLocal 是JDK包提供的，它提供了线程本地变量，也就是如果你创建了一个ThreadLocal变量，那么访问这个变量的每个线程都会有这个变量的一个本地副本。  
+当多个线程操作这个变量时，实际操作的是自己本地内存里面的变量，从而避免了线程安全问题。  
+创建一个ThreadLocal变量后，每个线程都会复制一个变量到自己本地内存。 
+
+#### 1.11.2 ThreadLocal的实现原理
+Thread类中有两个ThreadLocalMap类型的变量,默认情况下都是null，只有当前线程第一次调用ThreadLoacl的set或者get方法才创建他们。
+* theadLocals:
+* inheritableThreadLocals:
+
+##### 1.11.2.1 ThreadLocal set方法实现逻辑
+```java
+public class ThreadLocal<T>{
+
+    public void set(T value) {
+        Thread t = Thread.currentThread();
+        ThreadLocalMap map = getMap(t);
+        if (map != null)
+            map.set(this, value);
+        else
+            createMap(t, value);
+    }
+
+    ThreadLocalMap getMap(Thread t) {
+        return t.threadLocals;
+    }
+    
+    void createMap(Thread t, T firstValue) {
+        t.threadLocals = new ThreadLocalMap(this, firstValue);
+    }
+    
+    static class ThreadLocalMap {
+            void createMap(Thread t, T firstValue) {
+                t.threadLocals = new ThreadLocalMap(this, firstValue);
+            }
+    }
+}
+```
+##### 1.11.2.2 ThreadLocal get方法实现逻辑
+```java
+public class ThreadLocal<T>{
+
+    public T get() {
+        Thread t = Thread.currentThread();
+        ThreadLocalMap map = getMap(t);
+        if (map != null) {
+            ThreadLocalMap.Entry e = map.getEntry(this);
+            if (e != null) {
+                @SuppressWarnings("unchecked")
+                T result = (T)e.value;
+                return result;
+            }
+        }
+        return setInitialValue();
+    }
+        
+    private T setInitialValue() {
+        T value = initialValue();
+        Thread t = Thread.currentThread();
+        ThreadLocalMap map = getMap(t);
+        if (map != null)
+            map.set(this, value);
+        else
+            createMap(t, value);
+        return value;
+    }
+    
+    protected T initialValue() {
+        return null;
+    }
+}
+```
+
+##### 1.11.2.3 ThreadLocal get方法实现逻辑
+```java
+public class ThreadLocal<T>{
+     public void remove() {
+         ThreadLocalMap m = getMap(Thread.currentThread());
+         if (m != null)
+             m.remove(this);
+     }
+     
+    ThreadLocalMap getMap(Thread t) {
+        return t.threadLocals;
+    }
+}
+```
+
+##### 1.11.3 ThreadLocal不支持继承性
+同一个threadlocal变量在父线程中被设置值后，在子线程中是获取不到的。因为在子线程thread里面调用get方法时当前线程为thread线程。  
+比如main函数里新建一个线程，main函数设置的threadLocal子线程里获取不到。  
+
+
+##### 1.11.4 InheritableThreadLocal类
+InheritableThreadLocal支持继承。
+
+```java
+public class InheritableThreadLocal<T> extends ThreadLocal<T> {
+    protected T childValue(T parentValue) {
+        return parentValue;
+    }
+    
+    ThreadLocalMap getMap(Thread t) {
+       return t.inheritableThreadLocals;
+    }
+    
+    void createMap(Thread t, T firstValue) {
+        t.inheritableThreadLocals = new ThreadLocalMap(this, firstValue);
+    }
+}
+
+```
+
+InheritableThreadLocal继承了ThreadLocal，并重写了三个方法。
+
+```java
+public class Thread implements Runnable {
+    public Thread(Runnable target) {
+        init(null, target, "Thread-" + nextThreadNum(), 0);
+    }
+    
+    private void init(ThreadGroup g, Runnable target, String name, long stackSize, AccessControlContext acc) {
+        if (name == null) {
+            throw new NullPointerException("name cannot be null");
+        }
+
+        this.name = name.toCharArray();
+
+        Thread parent = currentThread();
+        SecurityManager security = System.getSecurityManager();
+        if (g == null) {
+            if (security != null) {
+                g = security.getThreadGroup();
+            }
+
+            if (g == null) {
+                g = parent.getThreadGroup();
+            }
+        }
+
+        g.checkAccess();
+
+        if (security != null) {
+            if (isCCLOverridden(getClass())) {
+                security.checkPermission(SUBCLASS_IMPLEMENTATION_PERMISSION);
+            }
+        }
+
+        g.addUnstarted();
+
+        this.group = g;
+        this.daemon = parent.isDaemon();
+        this.priority = parent.getPriority();
+        if (security == null || isCCLOverridden(parent.getClass()))
+            this.contextClassLoader = parent.getContextClassLoader();
+        else
+            this.contextClassLoader = parent.contextClassLoader;
+        this.inheritedAccessControlContext =
+                acc != null ? acc : AccessController.getContext();
+        this.target = target;
+        setPriority(priority);
+        if (parent.inheritableThreadLocals != null)
+            this.inheritableThreadLocals =
+                ThreadLocal.createInheritedMap(parent.inheritableThreadLocals);
+        this.stackSize = stackSize;
+
+        tid = nextThreadID();
+    }
+    
+
+}
+```
+
+```java
+public class ThreadLocal<T> {
+    
+    static ThreadLocalMap createInheritedMap(ThreadLocalMap parentMap) {
+        return new ThreadLocalMap(parentMap);
+    }
+    
+    private ThreadLocalMap(ThreadLocalMap parentMap) {
+        Entry[] parentTable = parentMap.table;
+        int len = parentTable.length;
+        setThreshold(len);
+        table = new Entry[len];
+
+        for (int j = 0; j < len; j++) {
+            Entry e = parentTable[j];
+            if (e != null) {
+                @SuppressWarnings("unchecked")
+                ThreadLocal<Object> key = (ThreadLocal<Object>) e.get();
+                if (key != null) {
+                    Object value = key.childValue(e.value);
+                    Entry c = new Entry(key, value);
+                    int h = key.threadLocalHashCode & (len - 1);
+                    while (table[h] != null)
+                        h = nextIndex(h, len);
+                    table[h] = c;
+                    size++;
+                }
+            }
+        }
+    }
+}
+```
 
 
 ## 第2章 并发编程的其他基础知识
