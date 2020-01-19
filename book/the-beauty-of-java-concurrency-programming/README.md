@@ -506,7 +506,16 @@ volatile关键字使用场景：
 
 
 ### 2.7 Java中的原子性操作
+* 原子性操作：指一系列的操作要么全部执行要么全部不执行。
+
 ### 2.8 Java中的CAS操作
+* 因为使用锁会导致线程阻塞挂起，这会导致上下文切换和重新调度开销。  
+* 虽然volatile关键字解决了共享变量的可见性问题，但并不能解决读-改-写的原子性问题。  
+* CAS：即compare and swap，是JDK提供的非阻塞原子性操作，它通过硬件保证了原子性操作。  
+* compareAndSwap*方法：其中compareAndSwap的意思是比较并交换。JDK里面的Unsafe类提供了一系列的compareAndSwap*方法，
+> boolean compareAndSwapLong(Object obj,long valueOffset,long expect,long update）方法：  
+CAS有四个操作数，分别为：对象内存位置、对象中的变量的偏移量、变量预期值和新的值。如果对象obj中内存偏移量为valueOffset的变量值为expect，则使用新的值update替换旧的值expect。这是处理器提供的一个原子性指令 。
+
 ### 2.9 Unsafe类
 ### 2.10 Java指令重排序
 ### 2.11 伪共享
