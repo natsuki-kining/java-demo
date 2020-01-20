@@ -517,6 +517,30 @@ volatile关键字使用场景：
 CAS有四个操作数，分别为：对象内存位置、对象中的变量的偏移量、变量预期值和新的值。如果对象obj中内存偏移量为valueOffset的变量值为expect，则使用新的值update替换旧的值expect。这是处理器提供的一个原子性指令 。
 
 ### 2.9 Unsafe类
+#### 2.9.1 Unsafe类中的重要方法
+JDK的rt.jar包中的Unsafe类提供了硬件级别的原子性操作，Unsafe类中的方法都是native方法，它们使用JNI的方式访问本地C++实现库。    
+了解Unsafe类提供的几个主要的方法:
+* long objectFieldOffset(Field field)方法；返回指定变量所属类中的内存偏移量，该偏移量仅在使用该Unsafe函数中访问指定字节时使用。如下代码使用Unsafe获取变量value在AtomicLong对象中的内存偏移。
+  
+```
+  static {
+      try{
+          valueOffset=unsafe.objectFieldOffset(AtomicLong.class.getDeclaredField("value"));
+      }catch(Exception e){
+          throw new Error(r);
+      }
+  }
+```
+
+* int arrayBaseOffset(Class arrayClass)方法：获取数组中第一个元素的地址
+
+* int arrayIndexScale(Class arrayClass)方法：获取数组中一个元素的字节大小
+
+* boolean compareAndSwapLong(Object obj,long offset,long expect,long update)方法：比较对象obj中偏移量为offset的变量的值是否与expect相等，如果相等就使用update的值更新，然后返回true，否则返回false。  
+
+* public native long getLongVolatile(Object obj,long offset)方法：获取对象obj中的偏移量为offset的变量对应volatile语义的值。
+
+
 ### 2.10 Java指令重排序
 ### 2.11 伪共享
 ### 2.12 锁的概述
