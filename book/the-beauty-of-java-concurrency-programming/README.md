@@ -540,6 +540,7 @@ JDK的rt.jar包中的Unsafe类提供了硬件级别的原子性操作，Unsafe�
 
 * public native long getLongVolatile(Object obj,long offset)方法：获取对象obj中的偏移量为offset的变量对应volatile语义的值。
 
+* void putLongVolatile(Object obj,long offset,long value)方法：设置obj对象中offset偏移地址对用的long类field值为value。
 
 ### 2.10 Java指令重排序
 ### 2.11 伪共享
