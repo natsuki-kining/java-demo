@@ -16,3 +16,6 @@ git status
 head：当前commit的引用
 master：对commit的引用
 branch：对
+
+多个远程仓库
+git remote set-url --add origin https://github.com/natsuki-kining/java-demo.git

@@ -542,7 +542,13 @@ JDK的rt.jar包中的Unsafe类提供了硬件级别的原子性操作，Unsafe�
 
 * void putLongVolatile(Object obj,long offset,long value)方法：设置obj对象中offset偏移地址对用的long类field值为value。
 
+#### 2.9.2 如何使用Unsafe类
+> [demo](src/main/java/com/natsuki_kining/book/beauty/concurrency/part1/chapter2/Demo2_9_Unsafe.java)
+
 ### 2.10 Java指令重排序
+Java内存模型允许编译器和处理器对指令重排序以提高允许性能，并且只会对不存在数据依赖性的指令重排序。  
+在单线程下重排序可以保证最终执行的结果与程序顺序执行的结果一致，但是在多线程下就会存在问题。  
+
 ### 2.11 伪共享
 ### 2.12 锁的概述
 ### 2.13 总结
