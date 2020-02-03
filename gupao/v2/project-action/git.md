@@ -19,3 +19,8 @@ branch：对
 
 多个远程仓库
 git remote set-url --add origin https://github.com/natsuki-kining/java-demo.git
+
+设置邮箱跟用户名
+git config user.name "natsuki-kining"
+git config user.email "natsuki_kining@126.com"
+
