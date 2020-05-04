@@ -5,7 +5,6 @@ import com.natsuki_kining.gupao.v2.source_code.design_pattern.proxy.Person;
 import java.lang.reflect.Method;
 
 public class GpWorkProxy implements GpInvocationHandler{
-public class GpWorkProxy implements GpInvocationHandler{
 
     private Person target;
 
