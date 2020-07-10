@@ -167,7 +167,7 @@ public class HashMap8<K,V> extends AbstractMap<K,V> implements Map<K,V> {
                 for (int binCount = 0; ; ++binCount) {
                     if ((e = p.next) == null) {
                         p.next = newNode(hash, key, value, null);
-                        if (binCount >= TREEIFY_THRESHOLD - 1) // -1 for 1st
+                        if (binCount >= TREEIFY_THRESHOLD - 1)
                             treeifyBin(tab, hash);
                         break;
                     }
@@ -177,7 +177,7 @@ public class HashMap8<K,V> extends AbstractMap<K,V> implements Map<K,V> {
                     p = e;
                 }
             }
-            if (e != null) { // existing mapping for key
+            if (e != null) {
                 V oldValue = e.value;
                 if (!onlyIfAbsent || oldValue == null)
                     e.value = value;
@@ -202,7 +202,7 @@ public class HashMap8<K,V> extends AbstractMap<K,V> implements Map<K,V> {
         HashMap8.Node<K,V>[] tab; HashMap8.Node<K,V> first, e; int n; K k;
         if ((tab = table) != null && (n = tab.length) > 0 &&
                 (first = tab[(n - 1) & hash]) != null) {
-            if (first.hash == hash && // always check first node
+            if (first.hash == hash &&
                     ((k = first.key) == key || (key != null && key.equals(k))))
                 return first;
             if ((e = first.next) != null) {
