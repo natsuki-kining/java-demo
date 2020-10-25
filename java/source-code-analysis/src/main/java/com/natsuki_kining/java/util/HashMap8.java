@@ -17,16 +17,25 @@ import java.util.Objects;
  **/
 public class HashMap8<K,V> extends AbstractMap<K,V> implements Map<K,V> {
 
-
+    //默认初始化容量 16。容量必须为2的次方。默认的hashmap大小为16.
     static final int DEFAULT_INITIAL_CAPACITY = 1 << 4; // aka 16
+    //最大的容量大小2^30
     static final int MAXIMUM_CAPACITY = 1 << 30;
+    //默认resize的因子。0.75，即实际数量超过总数DEFAULT_LOAD_FACTOR的数量即会发生resize动作。
     static final float DEFAULT_LOAD_FACTOR = 0.75f;
+    //树化阈值。当单个segment的容量超过阈值时，将链表转化为红黑树。
     static final int TREEIFY_THRESHOLD = 8;
+    //链表化阈值。当resize后或者删除操作后单个segment的容量低于阈值时，将红黑树转化为链表。
     static final int UNTREEIFY_THRESHOLD = 6;
+    //最小树化容量。当桶中的bin被树化时最小的hash表容量，低于该容量时不会树化。
     static final int MIN_TREEIFY_CAPACITY = 64;
-
+    //修改次数
     transient int modCount;
+    //当HashMap的size大于threshold时会执行resize操作
+    //threshold = capacity*loadFactor
     int threshold;
+    //译为装载因子。装载因子用来衡量HashMap满的程度。loadFactor的默认值为0.75f。
+    //计算HashMap的实时装载因子的方法为：size/capacity，而不是占用桶的数量去除以capacity。
     final float loadFactor;
     transient HashMap8.Node<K,V>[] table;
     transient int size;
@@ -679,6 +688,8 @@ public class HashMap8<K,V> extends AbstractMap<K,V> implements Map<K,V> {
 
     /**
      * 变为2的n次方
+     *
+     * 好处：主要是可以使用按位与替代取模来提升hash的效率
      * @param cap
      * @return
      */
@@ -707,56 +718,76 @@ public class HashMap8<K,V> extends AbstractMap<K,V> implements Map<K,V> {
         int oldThr = threshold;
         int newCap, newThr = 0;
         if (oldCap > 0) {
+            // 超过最大值就不再扩充了
             if (oldCap >= MAXIMUM_CAPACITY) {
                 threshold = Integer.MAX_VALUE;
                 return oldTab;
             }
-            else if ((newCap = oldCap << 1) < MAXIMUM_CAPACITY &&
-                    oldCap >= DEFAULT_INITIAL_CAPACITY)
+            // 没超过最大值，就扩充为原来的2次方 newCap = x << 1 扩大为 x的平方
+            else if ((newCap = oldCap << 1) < MAXIMUM_CAPACITY && oldCap >= DEFAULT_INITIAL_CAPACITY) {
                 newThr = oldThr << 1;
+            }
         }
-        else if (oldThr > 0)
+        //oldCap = 0，原数组为空
+        else if (oldThr > 0) {
             newCap = oldThr;
+        }
+        //元数组为空，并且threshold=0，则都设置为默认值
         else {
             newCap = DEFAULT_INITIAL_CAPACITY;
             newThr = (int)(DEFAULT_LOAD_FACTOR * DEFAULT_INITIAL_CAPACITY);
         }
         if (newThr == 0) {
             float ft = (float)newCap * loadFactor;
-            newThr = (newCap < MAXIMUM_CAPACITY && ft < (float)MAXIMUM_CAPACITY ?
-                    (int)ft : Integer.MAX_VALUE);
+            newThr = (newCap < MAXIMUM_CAPACITY && ft < (float)MAXIMUM_CAPACITY ? (int)ft : Integer.MAX_VALUE);
         }
         threshold = newThr;
+        //创建新数组，将旧桶里的数据移到新桶里
         @SuppressWarnings({"rawtypes","unchecked"})
         HashMap8.Node<K,V>[] newTab = (HashMap8.Node<K,V>[])new HashMap8.Node[newCap];
         table = newTab;
         if (oldTab != null) {
+            // 把每个bucket都移动到新的buckets中
+            //oldCap久数组的长度
             for (int j = 0; j < oldCap; ++j) {
+                //桶里的第一个元素
                 HashMap8.Node<K,V> e;
                 if ((e = oldTab[j]) != null) {
+                    // 清除原来table[i]中的值
                     oldTab[j] = null;
-                    if (e.next == null)
+                    //如果只有一个节点，则直接放进去
+                    if (e.next == null) {
                         newTab[e.hash & (newCap - 1)] = e;
-                    else if (e instanceof HashMap8.TreeNode)
-                        ((HashMap8.TreeNode<K,V>)e).split(this, newTab, j, oldCap);
+                    }
+                    //如果是红黑树，则进行红黑树的操作
+                    else if (e instanceof HashMap8.TreeNode) {
+                        ((HashMap8.TreeNode<K, V>) e).split(this, newTab, j, oldCap);
+                    }
                     else {
                         HashMap8.Node<K,V> loHead = null, loTail = null;
                         HashMap8.Node<K,V> hiHead = null, hiTail = null;
                         HashMap8.Node<K,V> next;
                         do {
                             next = e.next;
+                            //e.hash & oldCap == 0 原来的坐标没有发生变化
+                            //e.hash & oldCap != 0 在原来坐标的前提下增加 oldCap
+                            //https://www.cnblogs.com/shoshana-kong/p/9633634.html
                             if ((e.hash & oldCap) == 0) {
-                                if (loTail == null)
+                                if (loTail == null) {
                                     loHead = e;
-                                else
+                                }
+                                else {
                                     loTail.next = e;
+                                }
                                 loTail = e;
                             }
                             else {
-                                if (hiTail == null)
+                                if (hiTail == null) {
                                     hiHead = e;
-                                else
+                                }
+                                else {
                                     hiTail.next = e;
+                                }
                                 hiTail = e;
                             }
                         } while ((e = next) != null);
@@ -766,6 +797,7 @@ public class HashMap8<K,V> extends AbstractMap<K,V> implements Map<K,V> {
                         }
                         if (hiTail != null) {
                             hiTail.next = null;
+                            //在原来坐标的前提下增加 oldCap
                             newTab[j + oldCap] = hiHead;
                         }
                     }
