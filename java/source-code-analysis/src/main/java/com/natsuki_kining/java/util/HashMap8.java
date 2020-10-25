@@ -101,7 +101,7 @@ public class HashMap8<K,V> extends AbstractMap<K,V> implements Map<K,V> {
         }
     }
 
-    static final class TreeNode<K,V> extends Node {
+    static final class TreeNode<K,V> extends LinkedHashMap.Entry<K,V> {
         TreeNode<K,V> parent;  //父节点
         TreeNode<K,V> left;//左子节点
         TreeNode<K,V> right;//右子节点
