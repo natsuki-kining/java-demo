@@ -4,9 +4,9 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
+    <artifactId>microservice</artifactId>
     <groupId>com.natsuki_kining</groupId>
-    <artifactId>spring-cloud-and-docker2</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>spring-cloud-and-docker2</version>
     <packaging>pom</packaging>
 
     <modules>
@@ -33,7 +33,6 @@
         <module>chapter7-microservice-hystrix-dashboard</module>
         <module>chapter7-microservice-hystrix-turbine</module>
         <module>chapter7-microservice-consumer-movie-ribbon-hystrix-turbine-mq</module>
-        <module>chapter7-microservice-hystrix-turbine-mq</module>
         <module>chapter7-microservice-hystrix-turbine-mq</module>
         <module>chapter8-microservice-gateway-zuul</module>
         <module>chapter8-microservice-file-upload</module>
@@ -70,13 +69,13 @@
 <!--    </dependencies>-->
 
     <!-- 添加spring-boot的maven插件 -->
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
-            </plugin>
-        </plugins>
-    </build>
+<!--    <build>-->
+<!--        <plugins>-->
+<!--            <plugin>-->
+<!--                <groupId>org.springframework.boot</groupId>-->
+<!--                <artifactId>spring-boot-maven-plugin</artifactId>-->
+<!--            </plugin>-->
+<!--        </plugins>-->
+<!--    </build>-->
 
 </project>
