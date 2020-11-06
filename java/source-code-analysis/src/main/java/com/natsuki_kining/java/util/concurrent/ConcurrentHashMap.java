@@ -43,6 +43,7 @@ public class ConcurrentHashMap<K,V> extends AbstractMap<K,V> implements Concurre
     };
     transient volatile Node<K,V>[] table;
     private transient volatile Node<K,V>[] nextTable;
+    //用来记录元素个数的成员属性
     private transient volatile long baseCount;
     private transient volatile int sizeCtl;
     private transient volatile int transferIndex;
@@ -193,16 +194,26 @@ public class ConcurrentHashMap<K,V> extends AbstractMap<K,V> implements Concurre
 
     final V putVal(K key, V value, boolean onlyIfAbsent) {
         if (key == null || value == null) throw new NullPointerException();
+        //得到hash值
         int hash = spread(key.hashCode());
         int binCount = 0;
+        //自旋
         for (Node<K,V>[] tab = table;;) {
-            Node<K,V> f; int n, i, fh;
-            if (tab == null || (n = tab.length) == 0)
+            Node<K,V> f;
+            int n, i, fh;
+            //第一次插入
+            if (tab == null || (n = tab.length) == 0) {
+                //如果为空就进行初始化
                 tab = initTable();
+            }
+            //i = (n - 1) & hash  ->计算出下标
+            //如果为空，则直接创建一个Node节点放进去
             else if ((f = tabAt(tab, i = (n - 1) & hash)) == null) {
-                if (casTabAt(tab, i, null,
-                        new Node<K,V>(hash, key, value, null)))
+                //如果直接tab[i] = Node。可能会存在并发的情况，然后覆盖掉值。
+                if (casTabAt(tab, i, null,new Node<K,V>(hash, key, value, null))) {
+                    //存储成功则直接跳出循环，后面的代码可以不用看了
                     break;
+                }
             }
             else if ((fh = f.hash) == MOVED)
                 tab = helpTransfer(tab, f);
@@ -383,14 +394,24 @@ public class ConcurrentHashMap<K,V> extends AbstractMap<K,V> implements Concurre
         return Integer.numberOfLeadingZeros(n) | (1 << (RESIZE_STAMP_BITS - 1));
     }
 
+    /**
+     * 初始化
+     * 处理并发，安全处理
+     * @return
+     */
     private final Node<K,V>[] initTable() {
-        Node<K,V>[] tab; int sc;
+        Node<K,V>[] tab;
+        int sc;
         while ((tab = table) == null || tab.length == 0) {
-            if ((sc = sizeCtl) < 0)
+            if ((sc = sizeCtl) < 0) {
                 Thread.yield();
+            }
+            //cas操作，改变SIZECTL的值。
+            //如果sizeCtl=-1，则表示当前已经有线程抢到了初始化的权限
             else if (U.compareAndSwapInt(this, SIZECTL, sc, -1)) {
                 try {
                     if ((tab = table) == null || tab.length == 0) {
+                        //设置长度
                         int n = (sc > 0) ? sc : DEFAULT_CAPACITY;
                         @SuppressWarnings("unchecked")
                         Node<K,V>[] nt = (Node<K,V>[])new Node<?,?>[n];
@@ -398,6 +419,7 @@ public class ConcurrentHashMap<K,V> extends AbstractMap<K,V> implements Concurre
                         sc = n - (n >>> 2);
                     }
                 } finally {
+                    //sizeCtl = sc = n * 0.75
                     sizeCtl = sc;
                 }
                 break;
@@ -580,16 +602,32 @@ public class ConcurrentHashMap<K,V> extends AbstractMap<K,V> implements Concurre
         }
     }
 
+    /**
+     * 增加一个元素
+     *
+     * 是一个并发场景
+     * 如果保证size的原子性？
+     * 如果加锁性能又会下降。
+     *
+     * 分段治理
+     *
+     * addCount主要功能：增加元素，扩容判断
+     * @param x
+     * @param check
+     */
     private final void addCount(long x, int check) {
-        CounterCell[] as; long b, s;
-        if ((as = counterCells) != null ||
-                !U.compareAndSwapLong(this, BASECOUNT, b = baseCount, s = b + x)) {
+        //通过数组去记录元素的个数
+        CounterCell[] as;
+        long b, s;
+        //baseCount原子递增
+        if ((as = counterCells) != null || !U.compareAndSwapLong(this, BASECOUNT, b = baseCount, s = b + x)) {
             CounterCell a; long v; int m;
             boolean uncontended = true;
             if (as == null || (m = as.length - 1) < 0 ||
+                    //ThreadLocalRandom.getProbe() 线程安全的随机数
+                    //ThreadLocalRandom.getProbe() & m 下标一定在as里面
                     (a = as[ThreadLocalRandom.getProbe() & m]) == null || 
-                    !(uncontended =
-                            U.compareAndSwapLong(a, CELLVALUE, v = a.value, v + x))) {
+                    !(uncontended = U.compareAndSwapLong(a, CELLVALUE, v = a.value, v + x))) {
                 fullAddCount(x, uncontended);
                 return;
             }
@@ -729,12 +767,15 @@ public class ConcurrentHashMap<K,V> extends AbstractMap<K,V> implements Concurre
     }
 
     final long sumCount() {
-        CounterCell[] as = counterCells; CounterCell a;
+        //分片计数，随机生成一个下标，每个线程操作一个数组元素，就不存在并发问题
+        CounterCell[] as = counterCells;
+        CounterCell a;
         long sum = baseCount;
         if (as != null) {
             for (int i = 0; i < as.length; ++i) {
-                if ((a = as[i]) != null)
+                if ((a = as[i]) != null) {
                     sum += a.value;
+                }
             }
         }
         return sum;
@@ -753,15 +794,18 @@ public class ConcurrentHashMap<K,V> extends AbstractMap<K,V> implements Concurre
             if ((as = counterCells) != null && (n = as.length) > 0) {
                 if ((a = as[(n - 1) & h]) == null) {
                     if (cellsBusy == 0) {
+                        //构建一个CounterCell对象
                         CounterCell r = new CounterCell(x);
                         if (cellsBusy == 0 &&
                                 U.compareAndSwapInt(this, CELLSBUSY, 0, 1)) {
                             boolean created = false;
                             try {
-                                CounterCell[] rs; int m, j;
+                                CounterCell[] rs;
+                                int m, j;
                                 if ((rs = counterCells) != null &&
                                         (m = rs.length) > 0 &&
                                         rs[j = (m - 1) & h] == null) {
+                                    //赋值
                                     rs[j] = r;
                                     created = true;
                                 }
@@ -800,12 +844,15 @@ public class ConcurrentHashMap<K,V> extends AbstractMap<K,V> implements Concurre
                 }
                 h = ThreadLocalRandom.advanceProbe(h);
             }
-            else if (cellsBusy == 0 && counterCells == as &&
-                    U.compareAndSwapInt(this, CELLSBUSY, 0, 1)) {
+            //初始化逻辑,第一次进来
+            //这里也有可能出现并发,所以对CELLSBUSY做cas操作.如果CELLSBUSY=1 表示有其他线程正在扩容
+            else if (cellsBusy == 0 && counterCells == as && U.compareAndSwapInt(this, CELLSBUSY, 0, 1)) {
                 boolean init = false;
                 try {
                     if (counterCells == as) {
+                        //创建2个长度的CounterCell
                         CounterCell[] rs = new CounterCell[2];
+                        //随机生成随机数.因为长度是2,所以这里产生1或0就行
                         rs[h & 1] = new CounterCell(x);
                         counterCells = rs;
                         init = true;
