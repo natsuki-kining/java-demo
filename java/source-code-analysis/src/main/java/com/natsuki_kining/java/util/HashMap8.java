@@ -2,14 +2,44 @@ package com.natsuki_kining.java.util;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.HashMap;
 import java.util.Objects;
 
 /**
  * HashMap Java 1.8 实现
  *
- * 数组+链表转红黑树结构
- *
+ *  面试题：
+ *      1.put如何实现
+ *          1.调用putVal方法
+ *          2.判断桶是否为空，如果空就调用resize进行初始化
+ *          3.进行与运算，确定桶的下标，如果当前桶是空的，则直接放入元素。
+ *          4.否则就判断key值是否一样，一直则直接替换
+ *          5.如果不一样，则进行加到链表里面，如果链表长度大于等于8则转成红黑树
+ *          6.如果找到key值相同的，则返回旧值，没有则返回空
+ *      2.get如何实现
+ *          1.调用getNode方法
+ *          2.先判断桶是否为空，如果为空，则直接返回空
+ *          3.获取桶里的第一个元素，如果hash值跟key一样，则直接返回
+ *          4.如果不是则进入循环查找
+ *      3.hashMap中什么时候需要进行扩容，扩容resize()又是如何实现的
+ *          1.获取原本数组的长度，如果为空，则设置为默认值
+ *          2.判断是否超过最大值，如果超过就不扩充。最大值2的三十次方
+ *          3.没有超过最大值，则扩充容量为原来的2次方
+ *          4.创建新桶
+ *          5.重新计算hash值，将数据移到数组里，旧数组对应的下标设置为空
+ *      4.hash函数是怎么实现的？还有哪些hash函数的实现方式？
+ *          对key的hashCode做hash操作，与高16位做异或运算
+ *          还有平方取中法，除留余数法，伪随机数法
+ *      5.为什么不直接将key作为哈希值而是与高16位做异或运算？
+ *          因为数组位置的确定用的是与运算，仅仅最后四位有效，设计者将key的哈希值与高16为做异或运算使得在做&运算确定数组的插入位置时，
+ *          此时的低位实际是高位与低位的结合，增加了随机性，减少了哈希碰撞的次数。
+ *      6.为什么必须是2的幂？如果输入值不是2的幂比如10会怎么样？
+ *          为了数据的均匀分布，减少哈希碰撞。因为确定数组位置是用的位运算，若数据不是2的次幂则会增加哈希碰撞的次数和浪费数组空间。(PS:其实若不考虑效率，求余也可以就不用位运算了也不用长度必需为2的幂次)
+ *          输入数据若不是2的幂，HashMap通过一通位移运算和或运算得到的肯定是2的幂次数，并且是离那个数最近的数字
+ *      7.当两个对象的hashCode相等时会怎么样？
+ *          会产生哈希碰撞，若key值相同则替换旧值，不然链接到链表后面，链表长度超过阙值8就转为红黑树存储
+ *      8.如果两个键的hashcode相同，如何获取值对象？
+ *          HashCode相同，通过equals比较内容获取值对象
+ *      9.HashMap和HashTable的区别
  *
  *
  * @Author natsuki_kining
@@ -33,6 +63,7 @@ public class HashMap8<K,V> extends AbstractMap<K,V> implements Map<K,V> {
     transient int modCount;
     //当HashMap的size大于threshold时会执行resize操作
     //threshold = capacity*loadFactor
+    //DEFAULT_INITIAL_CAPACITY * DEFAULT_LOAD_FACTOR = 12 (一开始)
     int threshold;
     //译为装载因子。装载因子用来衡量HashMap满的程度。loadFactor的默认值为0.75f。
     //计算HashMap的实时装载因子的方法为：size/capacity，而不是占用桶的数量去除以capacity。
