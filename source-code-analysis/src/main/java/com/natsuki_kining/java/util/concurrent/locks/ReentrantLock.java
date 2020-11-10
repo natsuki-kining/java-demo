@@ -128,16 +128,21 @@ public class ReentrantLock implements Lock, java.io.Serializable {
          * Performs non-fair tryLock.  tryAcquire is implemented in
          * subclasses, but both need nonfair try for trylock method.
          */
+        /**
+         * 1. 获取当前线程，判断当前的锁的状态
+         * 2. 如果 state=0 表示当前是无锁状态，通过 cas 更新 state 状态的值
+         * 3. 当前线程是属于重入，则增加重入次数
+         */
         final boolean nonfairTryAcquire(int acquires) {
             final Thread current = Thread.currentThread();
             int c = getState();
-            if (c == 0) {
-                if (compareAndSetState(0, acquires)) {
-                    setExclusiveOwnerThread(current);
+            if (c == 0) {//表示无锁状态
+                if (compareAndSetState(0, acquires)) {//cas 替换 state 的值，cas 成功表示获取锁成功
+                    setExclusiveOwnerThread(current);//保存当前获得锁的线程,下次再来的时候不要再尝试竞争锁
                     return true;
                 }
             }
-            else if (current == getExclusiveOwnerThread()) {
+            else if (current == getExclusiveOwnerThread()) {//如果同一个线程来获得锁，直接增加重入次数
                 int nextc = c + acquires;
                 if (nextc < 0) // overflow
                     throw new Error("Maximum lock count exceeded");
@@ -212,10 +217,18 @@ public class ReentrantLock implements Lock, java.io.Serializable {
         final void lock() {
             if (compareAndSetState(0, 1))
                 setExclusiveOwnerThread(Thread.currentThread());
-            else
+            else {
+                //如果 CAS 操作未能成功，说明 state 已经不为 0，此时继续 acquire(1)操作
                 acquire(1);
+            }
         }
-
+        /**
+         * 这个方法的作用是尝试获取锁
+         * 如果成功返回 true，不成功返回 false
+         * 它是重写 AQS 类中的 tryAcquire 方法
+         *
+         * AQS 中 tryAcquire 方法的定义，并没有实现，而是抛出异常
+         */
         protected final boolean tryAcquire(int acquires) {
             return nonfairTryAcquire(acquires);
         }

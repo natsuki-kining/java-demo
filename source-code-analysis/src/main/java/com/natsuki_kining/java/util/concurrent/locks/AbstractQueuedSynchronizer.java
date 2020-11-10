@@ -604,6 +604,14 @@ public abstract class AbstractQueuedSynchronizer
          * 2. 当 state>0 时，表示已经有线程获得了锁，也就是 state=1，但是因为ReentrantLock 允许重入，所以同一个线程多次获得同步锁的时候，state 会递增，
          *    比如重入 5 次，那么 state=5。 而在释放锁的时候，同样需要释放 5 次直到 state=0 其他线程才有资格获得锁
          */
+        /**
+         * stateOffset
+         * 一个 Java 对象可以看成是一段内存，每个字段都得按照一定的顺序放在这段内存
+         * 里，通过这个方法可以准确地告诉你某个字段相对于对象的起始内存地址的字节
+         * 偏移。用于在后面的 compareAndSwapInt 中，去根据偏移量找到对象在内存中的
+         * 具体位置
+         * 所以 stateOffset 表示 state 这个字段在 AQS 类的内存中相对于该类首地址的偏移量
+         */
         return unsafe.compareAndSwapInt(this, stateOffset, expect, update);
     }
 
@@ -620,6 +628,9 @@ public abstract class AbstractQueuedSynchronizer
      * Inserts node into queue, initializing if necessary. See picture above.
      * @param node the node to insert
      * @return node's predecessor
+     */
+    /**
+     * enq 就是通过自旋操作把当前节点加入到队列中
      */
     private Node enq(final Node node) {
         for (;;) {
@@ -643,18 +654,27 @@ public abstract class AbstractQueuedSynchronizer
      * @param mode Node.EXCLUSIVE for exclusive, Node.SHARED for shared
      * @return the new node
      */
+    /**
+     * 当 tryAcquire 方法获取锁失败以后，则会先调用 addWaiter 将当前线程封装成Node.
+     * 入参 mode 表示当前节点的状态，传递的参数是 Node.EXCLUSIVE，表示独占状态。
+     * 意味着重入锁用到了 AQS 的独占锁功能
+     *
+     * 1. 将当前线程封装成 Node
+     * 2. 判断当前链表中的 tail 节点是否为空，如果不为空，则通过 cas 操作把当前线程的node 添加到 AQS 队列
+     * 3. 如果为空或者 cas 失败，调用 enq 将节点添加到 AQS 队列
+     */
     private Node addWaiter(Node mode) {
         Node node = new Node(Thread.currentThread(), mode);
         // Try the fast path of enq; backup to full enq on failure
-        Node pred = tail;
-        if (pred != null) {
-            node.prev = pred;
-            if (compareAndSetTail(pred, node)) {
-                pred.next = node;
+        Node pred = tail;                           //tail 是 AQS 中表示同比队列队尾的属性，默认是 null
+        if (pred != null) {                         //tail 不为空的情况下，说明队列中存在节点
+            node.prev = pred;                       //把当前线程的 Node 的 prev 指向 tail
+            if (compareAndSetTail(pred, node)) {    //通过 cas 把 node加入到 AQS 队列，也就是设置为 tail
+                pred.next = node;                   //设置成功以后，把原 tail 节点的 next指向当前 node
                 return node;
             }
         }
-        enq(node);
+        enq(node);                                  //tail=null,把 node 添加到同步队列
         return node;
     }
 
@@ -895,21 +915,30 @@ public abstract class AbstractQueuedSynchronizer
      * @param arg the acquire argument
      * @return {@code true} if interrupted while waiting
      */
+    /**
+     * 通过 addWaiter 方法把线程添加到链表后，会接着把 Node 作为参数传递给acquireQueued 方法，去竞争锁
+     * 1. 获取当前节点的 prev 节点
+     * 2. 如果 prev 节点为 head 节点，那么它就有资格去争抢锁，调用 tryAcquire 抢占锁
+     * 3. 抢占锁成功以后，把获得锁的节点设置为 head，并且移除原来的初始化 head节点
+     * 4. 如果获得锁失败，则根据 waitStatus 决定是否需要挂起线程
+     * 5. 最后，通过 cancelAcquire 取消获得锁的操作
+     */
     final boolean acquireQueued(final Node node, int arg) {
         boolean failed = true;
         try {
             boolean interrupted = false;
             for (;;) {
-                final Node p = node.predecessor();
-                if (p == head && tryAcquire(arg)) {
-                    setHead(node);
-                    p.next = null; // help GC
+                final Node p = node.predecessor();      //获取当前节点的 prev 节点
+                if (p == head && tryAcquire(arg)) {     //如果是 head 节点，说明有资格去争抢锁
+                    setHead(node);                      //获取锁成功，也就是ThreadA 已经释放了锁，然后设置 head 为 ThreadB 获得执行权限
+                    p.next = null; // help GC           // 把原 head 节点从链表中移除
                     failed = false;
                     return interrupted;
                 }
+                //ThreadA 可能还没释放锁，使得 ThreadB 在执行 tryAcquire 时会返回 false
                 if (shouldParkAfterFailedAcquire(p, node) &&
                     parkAndCheckInterrupt())
-                    interrupted = true;
+                    interrupted = true;                 //并且返回当前线程在等待过程中有没有中断过。
             }
         } finally {
             if (failed)
@@ -1113,6 +1142,13 @@ public abstract class AbstractQueuedSynchronizer
      *         correctly.
      * @throws UnsupportedOperationException if exclusive mode is not supported
      */
+    /**
+     * 这个方法的作用是尝试获取锁
+     * 如果成功返回 true，不成功返回 false
+     * 它是重写 AQS 类中的 tryAcquire 方法
+     *
+     * AQS 中 tryAcquire 方法的定义，并没有实现，而是抛出异常
+     */
     protected boolean tryAcquire(int arg) {
         throw new UnsupportedOperationException();
     }
@@ -1234,6 +1270,11 @@ public abstract class AbstractQueuedSynchronizer
      * @param arg the acquire argument.  This value is conveyed to
      *        {@link #tryAcquire} but is otherwise uninterpreted and
      *        can represent anything you like.
+     */
+    /**
+     * 1. 通过 tryAcquire 尝试获取独占锁，如果成功返回 true，失败返回 false
+     * 2. 如果 tryAcquire 失败，则会通过 addWaiter 方法将当前线程封装成 Node 添加到 AQS 队列尾部
+     * 3. acquireQueued，将 Node 作为参数，通过自旋去尝试获取锁
      */
     public final void acquire(int arg) {
         if (!tryAcquire(arg) &&
