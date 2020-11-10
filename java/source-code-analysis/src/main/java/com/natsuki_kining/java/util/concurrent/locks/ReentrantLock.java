@@ -204,6 +204,11 @@ public class ReentrantLock implements Lock, java.io.Serializable {
          * Performs lock.  Try immediate barge, backing up to normal
          * acquire on failure.
          */
+        /**
+         * 1. 非公平锁和公平锁最大的区别在于，在非公平锁中我抢占锁的逻辑是，不管有没有线程排队，我先上来 cas 去抢占一下
+         * 2. CAS 成功，就表示成功获得了锁
+         * 3. CAS 失败，调用 acquire(1)走锁竞争逻辑
+         */
         final void lock() {
             if (compareAndSetState(0, 1))
                 setExclusiveOwnerThread(Thread.currentThread());
@@ -282,6 +287,14 @@ public class ReentrantLock implements Lock, java.io.Serializable {
      * current thread becomes disabled for thread scheduling
      * purposes and lies dormant until the lock has been acquired,
      * at which time the lock hold count is set to one.
+     */
+    /**
+     * reentrantLock 获取锁的入口
+     * sync 实际上是一个抽象的静态内部类，它继承了 AQS 来实现重入锁的逻辑
+     *
+     * Sync 有两个具体的实现类，分别是：
+     *      NofairSync：(非公平锁)表示可以存在抢占锁的功能，也就是说不管当前队列上是否存在其他线程等待，新线程都有机会抢占锁
+     *      FailSync: (公平锁)表示所有线程严格按照 FIFO 来获取锁
      */
     public void lock() {
         sync.lock();

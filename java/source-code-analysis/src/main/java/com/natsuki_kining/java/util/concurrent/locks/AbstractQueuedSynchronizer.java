@@ -592,8 +592,18 @@ public abstract class AbstractQueuedSynchronizer
      * @return {@code true} if successful. False return indicates that the actual
      *         value was not equal to the expected value.
      */
+
     protected final boolean compareAndSetState(int expect, int update) {
         // See below for intrinsics setup to support this
+        //通过cas乐观锁的方式来做比较并替换，这段代码的意思是，如果当前内存中的state 的值和预期值 expect 相等，则替换为 update。更新成功返回 true，否则返回 false.
+        //这个操作是原子的，不会出现线程安全问题
+
+        /**
+         * state 是 AQS 中的一个属性，它在不同的实现中所表达的含义不一样，对于重入锁的实现来说，表示一个同步状态。它有两个含义的表示
+         * 1. 当 state=0 时，表示无锁状态
+         * 2. 当 state>0 时，表示已经有线程获得了锁，也就是 state=1，但是因为ReentrantLock 允许重入，所以同一个线程多次获得同步锁的时候，state 会递增，
+         *    比如重入 5 次，那么 state=5。 而在释放锁的时候，同样需要释放 5 次直到 state=0 其他线程才有资格获得锁
+         */
         return unsafe.compareAndSwapInt(this, stateOffset, expect, update);
     }
 
@@ -2287,6 +2297,11 @@ public abstract class AbstractQueuedSynchronizer
      * natively implement using hotspot intrinsics API. And while we
      * are at it, we do the same for other CASable fields (which could
      * otherwise be done with atomic field updaters).
+     */
+    /**
+     * Unsafe 类是在 sun.misc 包下，不属于 Java 标准。但是很多 Java 的基础类库，包括一些被广泛使用的高性能开发库都是基于 Unsafe 类开发的，比如 Netty、Hadoop、Kafka 等；
+     * Unsafe 可认为是 Java 中留下的后门，提供了一些低层次操作，如直接内存访问、线程的挂起和恢复、CAS、线程同步、内存屏障
+     * 而 CAS 就是 Unsafe 类中提供的一个原子操作，第一个参数为需要改变的对象，第二个为偏移量(即之前求出来的 headOffset 的值)，第三个参数为期待的值，第四个为更新后的值整个方法的作用是如果当前时刻的值等于预期值 var4 相等，则更新为新的期望值 var5，如果更新成功，则返回 true，否则返回 false；
      */
     private static final Unsafe unsafe = Unsafe.getUnsafe();
     private static final long stateOffset;
