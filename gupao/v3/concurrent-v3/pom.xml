@@ -2,15 +2,10 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <parent>
-        <artifactId>v3</artifactId>
-        <groupId>com.natsuki_kining</groupId>
-        <version>gupao-v3</version>
-    </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <version>gupao-concurrent-v3</version>
     <artifactId>concurrent-v3</artifactId>
-
+    <groupId>com.natsuki_kining.concurrent</groupId>
 
 </project>
