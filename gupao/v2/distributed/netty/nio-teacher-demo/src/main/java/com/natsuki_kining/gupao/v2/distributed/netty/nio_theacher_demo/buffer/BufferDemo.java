@@ -38,7 +38,7 @@ public class BufferDemo {
 
     public static void main(String[] args) throws UnsupportedEncodingException {
 
-        BufferDemo.decode("咕泡学院");
-        BufferDemo.encode("咕泡学院");
+        BufferDemo.decode("编码测试");
+        BufferDemo.encode("编码测试");
     }
 }
