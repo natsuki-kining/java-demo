@@ -14,6 +14,16 @@ import java.util.function.Consumer;
 /**
  * 怎么解决并发问题
  * 怎么满足效率问题
+ *      分段处理
+ *
+ * 转换成红黑树
+ *  1.如果链表的长度大于8,并且node数组的长度>64的时候
+ *  2.如果再添加数据到当前链表中，会把当前链表转化为红黑树
+ *
+ * 转换成链表
+ * 当出现扩容的时候，如果链表的长度小于8，把红黑树转化为链表
+ *
+ *
  *
  * @Author : natsuki_kining
  * @Date : 2020/11/21 22:13
@@ -219,20 +229,27 @@ public class ConcurrentHashMap<K,V> extends AbstractMap<K,V> implements Concurre
                 tab = helpTransfer(tab, f);
             else {
                 V oldVal = null;
+                //如果不为空，则说明数组的当前下标有值
+                //给f加同步锁，锁住头结点
+                //给头结点加锁，锁的力度细。同时支持数组长度的并发。比如初始值是16，则同时支持16个并发
                 synchronized (f) {
+                    //判断这个元素有没有发生变化
                     if (tabAt(tab, i) == f) {
                         if (fh >= 0) {
                             binCount = 1;
                             for (Node<K,V> e = f;; ++binCount) {
                                 K ek;
+                                //如果相等的话直接覆盖
                                 if (e.hash == hash &&
                                         ((ek = e.key) == key ||
                                                 (ek != null && key.equals(ek)))) {
                                     oldVal = e.val;
+                                    //是否覆盖
                                     if (!onlyIfAbsent)
                                         e.val = value;
                                     break;
                                 }
+                                //否则查找下个节点
                                 Node<K,V> pred = e;
                                 if ((e = e.next) == null) {
                                     pred.next = new Node<K,V>(hash, key,
@@ -469,12 +486,20 @@ public class ConcurrentHashMap<K,V> extends AbstractMap<K,V> implements Concurre
         }
     }
 
+    /**
+     * 数据迁移
+     * @param tab
+     * @param nextTab
+     */
     private final void transfer(Node<K,V>[] tab, Node<K,V>[] nextTab) {
         int n = tab.length, stride;
+        //让每一个CPU去执行一段数据迁移,每一个CPU可以处理16个数组
+        //n >>> 3 = n / 8
         if ((stride = (NCPU > 1) ? (n >>> 3) / NCPU : n) < MIN_TRANSFER_STRIDE)
             stride = MIN_TRANSFER_STRIDE; // subdivide range
         if (nextTab == null) {            // initiating
             try {
+                //新数组
                 @SuppressWarnings("unchecked")
                 Node<K,V>[] nt = (Node<K,V>[])new Node<?,?>[n << 1];
                 nextTab = nt;
@@ -483,14 +508,18 @@ public class ConcurrentHashMap<K,V> extends AbstractMap<K,V> implements Concurre
                 return;
             }
             nextTable = nextTab;
+            //转移的下标
             transferIndex = n;
         }
         int nextn = nextTab.length;
         ForwardingNode<K,V> fwd = new ForwardingNode<K,V>(nextTab);
         boolean advance = true;
-        boolean finishing = false; // to ensure sweep before committing nextTab
+        boolean finishing = false;
+        //设置边界值.bound:数组处理的槽位
+        //比如数组长度当前为32,第一个线程进来,i=31,bound=16
         for (int i = 0, bound = 0;;) {
-            Node<K,V> f; int fh;
+            Node<K, V> f;
+            int fh;
             while (advance) {
                 int nextIndex, nextBound;
                 if (--i >= bound || finishing)
@@ -498,8 +527,7 @@ public class ConcurrentHashMap<K,V> extends AbstractMap<K,V> implements Concurre
                 else if ((nextIndex = transferIndex) <= 0) {
                     i = -1;
                     advance = false;
-                }
-                else if (U.compareAndSwapInt
+                } else if (U.compareAndSwapInt
                         (this, TRANSFERINDEX, nextIndex,
                                 nextBound = (nextIndex > stride ?
                                         nextIndex - stride : 0))) {
@@ -522,16 +550,21 @@ public class ConcurrentHashMap<K,V> extends AbstractMap<K,V> implements Concurre
                     finishing = advance = true;
                     i = n; // recheck before commit
                 }
-            }
-            else if ((f = tabAt(tab, i)) == null)
+            } else if ((f = tabAt(tab, i)) == null){
                 advance = casTabAt(tab, i, null, fwd);
+            }
+            //当前正在线程扩容
             else if ((fh = f.hash) == MOVED)
-                advance = true; // already processed
+                advance = true;
             else {
+                //开始转移
                 synchronized (f) {
                     if (tabAt(tab, i) == f) {
-                        Node<K,V> ln, hn;
+                        Node<K,V> ln, //低位链
+                                hn;//高位链
                         if (fh >= 0) {
+                            //n:数组的长度
+                            // 通过runBit对节点进行分类.runBit=0为一种,runBit!=0为一种
                             int runBit = fh & n;
                             Node<K,V> lastRun = f;
                             for (Node<K,V> p = f.next; p != null; p = p.next) {
@@ -556,7 +589,9 @@ public class ConcurrentHashMap<K,V> extends AbstractMap<K,V> implements Concurre
                                 else
                                     hn = new Node<K,V>(ph, pk, pv, hn);
                             }
+                            //低位链不需要变
                             setTabAt(nextTab, i, ln);
+                            //高位链需要+那n.保持hash&n一致
                             setTabAt(nextTab, i + n, hn);
                             setTabAt(tab, i, fwd);
                             advance = true;
@@ -640,6 +675,7 @@ public class ConcurrentHashMap<K,V> extends AbstractMap<K,V> implements Concurre
             while (s >= (long)(sc = sizeCtl) && (tab = table) != null &&
                     (n = tab.length) < MAXIMUM_CAPACITY) {
                 int rs = resizeStamp(n);
+                //有线程在扩容
                 if (sc < 0) {
                     if ((sc >>> RESIZE_STAMP_SHIFT) != rs || sc == rs + 1 ||
                             sc == rs + MAX_RESIZERS || (nt = nextTable) == null ||
@@ -648,6 +684,7 @@ public class ConcurrentHashMap<K,V> extends AbstractMap<K,V> implements Concurre
                     if (U.compareAndSwapInt(this, SIZECTL, sc, sc + 1))
                         transfer(tab, nt);
                 }
+                //如果是第一次,则直接设置
                 else if (U.compareAndSwapInt(this, SIZECTL, sc,
                         (rs << RESIZE_STAMP_SHIFT) + 2))
                     transfer(tab, null);
