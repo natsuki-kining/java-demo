@@ -1,4 +1,4 @@
-package com.natsuki_kining.springboot.thread.demo01;
+package com.natsuki_kining.springboot.demo.create;
 
 /**
  * 线程demo
@@ -29,6 +29,7 @@ public class ThreadDemo extends Thread {
 
     static class RunnableDemo implements Runnable{
 
+        @Override
         public void run() {
             System.out.println("Runnable");
         }

@@ -1,4 +1,4 @@
-package com.natsuki_kining.springboot.thread.demo02;
+package com.natsuki_kining.springboot.demo.status;
 
 import java.util.concurrent.TimeUnit;
 
