@@ -23,7 +23,7 @@ import java.util.Objects;
  *      3.hashMap中什么时候需要进行扩容，扩容resize()又是如何实现的
  *          1.获取原本数组的长度，如果为空，则设置为默认值
  *          2.判断是否超过最大值，如果超过就不扩充。最大值2的三十次方
- *          3.没有超过最大值，则扩充容量为原来的2次方
+ *          3.没有超过最大值，则扩充容量为原来的2倍
  *          4.创建新桶
  *          5.重新计算hash值，将数据移到数组里，旧数组对应的下标设置为空
  *      4.hash函数是怎么实现的？还有哪些hash函数的实现方式？
@@ -47,7 +47,7 @@ import java.util.Objects;
  **/
 public class HashMap8<K,V> extends AbstractMap<K,V> implements Map<K,V> {
 
-    //默认初始化容量 16。容量必须为2的次方。默认的hashmap大小为16.
+    //默认初始化容量 16。容量必须为2的幂。默认的hashmap大小为16.
     static final int DEFAULT_INITIAL_CAPACITY = 1 << 4; // aka 16
     //最大的容量大小2^30
     static final int MAXIMUM_CAPACITY = 1 << 30;
@@ -321,7 +321,7 @@ public class HashMap8<K,V> extends AbstractMap<K,V> implements Map<K,V> {
          * @param map
          * @param tab
          * @param index 数组的索引
-         * @param bit 数组长度,即HashMap的容量,是2的n次方
+         * @param bit 数组长度,即HashMap的容量,是2的幂
          */
         final void split(HashMap8<K,V> map, HashMap8.Node<K,V>[] tab, int index, int bit) {
             HashMap8.TreeNode<K,V> b = this;
@@ -718,7 +718,7 @@ public class HashMap8<K,V> extends AbstractMap<K,V> implements Map<K,V> {
     }
 
     /**
-     * 变为2的n次方
+     * 变为2的幂
      *
      * 好处：主要是可以使用按位与替代取模来提升hash的效率
      * @param cap
@@ -754,7 +754,7 @@ public class HashMap8<K,V> extends AbstractMap<K,V> implements Map<K,V> {
                 threshold = Integer.MAX_VALUE;
                 return oldTab;
             }
-            // 没超过最大值，就扩充为原来的2次方 newCap = x << 1 扩大为 x的平方
+            // 没超过最大值，就扩充为原来的2的幂 newCap = x << 1 扩大为 x的平方
             else if ((newCap = oldCap << 1) < MAXIMUM_CAPACITY && oldCap >= DEFAULT_INITIAL_CAPACITY) {
                 newThr = oldThr << 1;
             }
