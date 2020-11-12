@@ -1,4 +1,4 @@
-package com.natsuki_kining.thread;
+package com.natsuki_kining.springboot.thread.demo01;
 
 import java.util.concurrent.*;
 
