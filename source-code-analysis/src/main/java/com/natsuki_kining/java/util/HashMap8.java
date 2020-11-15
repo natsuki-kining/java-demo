@@ -754,7 +754,7 @@ public class HashMap8<K,V> extends AbstractMap<K,V> implements Map<K,V> {
                 threshold = Integer.MAX_VALUE;
                 return oldTab;
             }
-            // 没超过最大值，就扩充为原来的2的幂 newCap = x << 1 扩大为 x的平方
+            // 没超过最大值，就扩充为原来的2的幂 newCap = x << 1
             else if ((newCap = oldCap << 1) < MAXIMUM_CAPACITY && oldCap >= DEFAULT_INITIAL_CAPACITY) {
                 newThr = oldThr << 1;
             }
