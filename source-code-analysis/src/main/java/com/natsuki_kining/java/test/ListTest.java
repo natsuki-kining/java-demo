@@ -1,5 +1,7 @@
 package com.natsuki_kining.java.test;
 
+import com.natsuki_kining.java.util.LinkedList;
+
 /**
  * TODO
  *
@@ -9,7 +11,7 @@ package com.natsuki_kining.java.test;
 public class ListTest {
 
     public static void main(String[] args) {
-        
+        LinkedList linkedList = null;
     }
 
 
