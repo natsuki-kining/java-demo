@@ -3,68 +3,60 @@ package com.natsuki_kining.javademo.dam.redis.datatype;
 import com.natsuki_kining.javademo.dam.redis.utils.JedisUtil;
 
 import java.util.Arrays;
+import java.util.List;
 
+/**
+ * 可以用来存储字符串、整数、浮点数
+ */
 public class StringTest {
 
     public static void main(String[] args) {
+        //批量设置
+        String mset = JedisUtil.getJedisUtil().mset("key1", "value1", "key2", "value2");
+        System.out.println("mset key1 value1 key2 value");
+        System.out.println();
 
-        new Thread(()->lock(),"线程1").start();
-        new Thread(()->lock(),"线程2").start();
-        new Thread(()->lockByLua(),"线程3").start();
-        new Thread(()->lockByLua(),"线程4").start();
+        //批量获取
+        List<String> mget = JedisUtil.getJedisUtil().mget("key1", "key2");
+        System.out.println("mget key1 key2:"+mget.toString());
+        System.out.println();
+        
+        //获取长度
+        Long keyLength = JedisUtil.getJedisUtil().strLen("key1");
+        System.out.println("strLen key1:"+keyLength);
+        System.out.println();
 
-    }
+        //字符串追求内容
+        Long append = JedisUtil.getJedisUtil().append("key1", "append value");
+        System.out.println("get key1:"+JedisUtil.getJedisUtil().get("key1"));
+        System.out.println("append key1 append value:"+append);
+        System.out.println();
 
-    private static String LOCK_KEY = "lock_key";
-    private static String LOCK_VALUE = "lock_value";
-    private static long LOCK_TIME = 5;
+        //获取指定范围的字符
+        String getrange = JedisUtil.getJedisUtil().getrange("key1", 0, 5);
+        System.out.println("getrange key1 0 5:"+getrange);
+        System.out.println();
 
-    /**
-     * 分布式锁
-     * 由于使用setnx 设置过期时间跟值不是原子性，所以使用set 带参数方式
-     */
-    private static void lock() {
-        System.out.println(Thread.currentThread().getName()+":开始获取锁。");
-        while (true){
-            String value = JedisUtil.getJedisUtil().set(LOCK_KEY, LOCK_VALUE, "NX", "EX", LOCK_TIME);
-            System.out.println(Thread.currentThread().getName()+":尝试获取锁："+value);
-            if ("OK".equals(value)){
-                System.out.println(Thread.currentThread().getName()+":获取到锁");
-                break;
-            }
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-    }
+        //（整数）值递增
+        System.out.println("get intkey:"+JedisUtil.getJedisUtil().get("intKey"));
+        Long intKey = JedisUtil.getJedisUtil().incr("intKey");
+        System.out.println("incr intkey:"+intKey);
+        intKey = JedisUtil.getJedisUtil().incr("intKey");
+        System.out.println("incr intkey:"+intKey);
+        System.out.println("get intkey:"+JedisUtil.getJedisUtil().get("intKey"));
+        System.out.println();
 
-    private static String script = "" +
-            "local lockSet = redis.call('setnx', KEYS[1], ARGV[1])\n" +
-            "if lockSet == 1 then\n" +
-            "  redis.call('expire', KEYS[1], ARGV[2])\n" +
-            "end\n" +
-            "return lockSet";
 
-    /**
-     * 使用lua脚本实现多个命令的原子性
-     */
-    private static void lockByLua(){
-        System.out.println(Thread.currentThread().getName()+":开始获取锁。");
-        while (true) {
-            long value = (long) JedisUtil.getJedisUtil().eval(script, Arrays.asList(LOCK_KEY), Arrays.asList(LOCK_VALUE, LOCK_TIME + ""));
-            System.out.println(Thread.currentThread().getName() + ":尝试获取锁：" + value);
-            if (value != 0) {
-                System.out.println(Thread.currentThread().getName() + ":获取到锁");
-                break;
-            }
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
+        System.out.println("get intkey:"+JedisUtil.getJedisUtil().get("intKey"));
+        intKey = JedisUtil.getJedisUtil().incrBy("intKey",100);
+        System.out.println("incrby intkey 100:"+intKey);
+        System.out.println("get intkey:"+JedisUtil.getJedisUtil().get("intKey"));
+        System.out.println();
+
+        //（浮点数）值递增
+        String f1 = JedisUtil.getJedisUtil().set("f", "1.23");
+        System.out.println(f1);
+
     }
 
 
