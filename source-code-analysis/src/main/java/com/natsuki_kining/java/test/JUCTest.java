@@ -4,6 +4,8 @@ import com.natsuki_kining.java.util.concurrent.CountDownLatch;
 import com.natsuki_kining.java.util.concurrent.locks.Condition;
 import com.natsuki_kining.java.util.concurrent.locks.ReentrantLock;
 
+import java.util.concurrent.Semaphore;
+
 /**
  * TODO
  *
@@ -28,5 +30,8 @@ public class JUCTest {
         c.await();
         c.countDown();
 
+        Semaphore semaphore = new Semaphore(6);
+        semaphore.acquire();
+        semaphore.release();
     }
 }
