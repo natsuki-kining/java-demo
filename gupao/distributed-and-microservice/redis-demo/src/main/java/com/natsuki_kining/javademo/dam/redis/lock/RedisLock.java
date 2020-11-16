@@ -1,10 +1,10 @@
-package com.natsuki_kining.javademo.dam.redis.datatype;
+package com.natsuki_kining.javademo.dam.redis.lock;
 
 import com.natsuki_kining.javademo.dam.redis.utils.JedisUtil;
 
 import java.util.Arrays;
 
-public class StringTest {
+public class RedisLock {
 
     public static void main(String[] args) {
 
