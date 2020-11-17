@@ -631,6 +631,10 @@ public abstract class AbstractQueuedSynchronizer
      */
     /**
      * enq 就是通过自旋操作把当前节点加入到队列中
+     *
+     * 1. 将新的节点的 prev 指向 tail
+     * 2. 通过 cas 将 tail 设置为新的节点，因为 cas 是原子操作所以能够保证线程安全性
+     * 3. t.next=node；设置原 tail 的 next 节点指向新的节点
      */
     private Node enq(final Node node) {
         for (;;) {
@@ -641,6 +645,11 @@ public abstract class AbstractQueuedSynchronizer
             } else {
                 node.prev = t;
                 if (compareAndSetTail(t, node)) {
+                    /**
+                     * 在 cas 操作之后，t.next=node 操作之前。
+                     * 存在其他线程调用 unlock 方法从 head开始往后遍历，由于 t.next=node 还没执行意味着链表的关系还没有建立完整。
+                     * 就会导致遍历到 t 节点的时候被中断。所以在释放锁，unparkSuccessor方法从后往前遍历，一定不会存在这个问题
+                     */
                     t.next = node;
                     return t;
                 }
@@ -702,9 +711,9 @@ public abstract class AbstractQueuedSynchronizer
          * to clear in anticipation of signalling.  It is OK if this
          * fails or if status is changed by waiting thread.
          */
-        int ws = node.waitStatus;
+        int ws = node.waitStatus;                           //获得 head 节点的状态
         if (ws < 0)
-            compareAndSetWaitStatus(node, ws, 0);
+            compareAndSetWaitStatus(node, ws, 0);    //设置 head 节点状态为 0
 
         /*
          * Thread to unpark is held in successor, which is normally
@@ -712,14 +721,16 @@ public abstract class AbstractQueuedSynchronizer
          * traverse backwards from tail to find the actual
          * non-cancelled successor.
          */
-        Node s = node.next;
+        Node s = node.next;                                 //得到 head 节点的下一个节点
         if (s == null || s.waitStatus > 0) {
+            //如果下一个节点为 null 或者 status>0 表示 cancelled 状态.
+            //通过从尾部节点开始扫描，找到距离 head 最近的一个waitStatus<=0 的节点
             s = null;
             for (Node t = tail; t != null && t != node; t = t.prev)
                 if (t.waitStatus <= 0)
                     s = t;
         }
-        if (s != null)
+        if (s != null)                                      //next 节点不为空，直接唤醒这个线程即可
             LockSupport.unpark(s.thread);
     }
 
@@ -853,24 +864,40 @@ public abstract class AbstractQueuedSynchronizer
      * @param node the node
      * @return {@code true} if thread should block
      */
+    /**
+     * Node 有 5 中状态，分别是：CANCELLED（1），SIGNAL（-1）、CONDITION（-2）、PROPAGATE(-3)、默认状态(0)
+     *
+     * CANCELLED: 在同步队列中等待的线程等待超时或被中断，需要从同步队列中取消该 Node 的结点, 其结点的 waitStatus 为 CANCELLED，即结束状态，进入该状态后的结点将不会再变化
+     * SIGNAL: 只要前置节点释放锁，就会通知标识为 SIGNAL 状态的后续节点的线程
+     * CONDITION：
+     * PROPAGATE：共享模式下，PROPAGATE 状态的线程处于可运行状态
+     * 0:初始状态这个方法的主要作用是，通过 Node 的状态来判断，ThreadA 竞争锁失败以后是否应该被挂起。
+     *
+     * 1. 如果 ThreadA 的 pred 节点状态为 SIGNAL，那就表示可以放心挂起当前线程
+     * 2. 通过循环扫描链表把 CANCELLED 状态的节点移除
+     * 3. 修改 pred 节点的状态为 SIGNAL,返回 false.
+     *  返回 false 时，也就是不需要挂起，返回 true，则需要调用 parkAndCheckInterrupt挂起当前线程
+     */
     private static boolean shouldParkAfterFailedAcquire(Node pred, Node node) {
         int ws = pred.waitStatus;
         if (ws == Node.SIGNAL)
+            //如果前置节点为 SIGNAL，意味着只需要等待其他前置节点的线程被释放，
             /*
              * This node has already set status asking a release
              * to signal it, so it can safely park.
              */
-            return true;
-        if (ws > 0) {
+            return true;            //返回 true，意味着可以直接放心的挂起了
+        if (ws > 0) {               //ws 大于 0，意味着 prev 节点取消了排队，直接移除这个节点就行
             /*
              * Predecessor was cancelled. Skip over predecessors and
              * indicate retry.
              */
             do {
                 node.prev = pred = pred.prev;
-            } while (pred.waitStatus > 0);
+            } while (pred.waitStatus > 0);          //这里采用循环，从双向列表中移除 CANCELLED 的节点
             pred.next = node;
         } else {
+            //利用 cas 设置 prev 节点的状态为 SIGNAL(-1)
             /*
              * waitStatus must be 0 or PROPAGATE.  Indicate that we
              * need a signal, but don't park yet.  Caller will need to
@@ -884,6 +911,10 @@ public abstract class AbstractQueuedSynchronizer
     /**
      * Convenience method to interrupt current thread.
      */
+    /**
+     * 标识如果当前线程在 acquireQueued 中被中断过，则需要产生一个中断请求，
+     * 原因是线程在调用 acquireQueued 方法的时候是不会响应中断请求的
+     */
     static void selfInterrupt() {
         Thread.currentThread().interrupt();
     }
@@ -892,6 +923,13 @@ public abstract class AbstractQueuedSynchronizer
      * Convenience method to park and then check if interrupted
      *
      * @return {@code true} if interrupted
+     */
+    /**
+     * 使用 LockSupport.park 挂起当前线程编程 WATING 状态
+     * Thread.interrupted，返回当前线程是否被其他线程触发过中断请求，
+     *      也就是thread.interrupt() 如果有触发过中断请求，那么这个方法会返回当前的中断标识true，
+     *      并且对中断标识进行复位标识已经响应过了中断请求。
+     *      如果返回 true，意味着在 acquire 方法中会执行 selfInterrupt()。
      */
     private final boolean parkAndCheckInterrupt() {
         LockSupport.park(this);
@@ -936,6 +974,7 @@ public abstract class AbstractQueuedSynchronizer
                     return interrupted;
                 }
                 //ThreadA 可能还没释放锁，使得 ThreadB 在执行 tryAcquire 时会返回 false
+                //如果 ThreadA 的锁还没有释放的情况下，ThreadB 和 ThreadC 来争抢锁肯定是会失败，那么失败以后会调用 shouldParkAfterFailedAcquire 方法
                 if (shouldParkAfterFailedAcquire(p, node) &&
                     parkAndCheckInterrupt())
                     interrupted = true;                 //并且返回当前线程在等待过程中有没有中断过。
@@ -1339,10 +1378,15 @@ public abstract class AbstractQueuedSynchronizer
      *        can represent anything you like.
      * @return the value returned from {@link #tryRelease}
      */
+    /**
+     * unload 调用
+     * release(1)
+     *
+     */
     public final boolean release(int arg) {
-        if (tryRelease(arg)) {
-            Node h = head;
-            if (h != null && h.waitStatus != 0)
+        if (tryRelease(arg)) {                  //释放锁成功
+            Node h = head;                      //得到 aqs 中 head 节点
+            if (h != null && h.waitStatus != 0) //如果 head 节点不为空并且状态！=0.调用 unparkSuccessor(h)唤醒后续节点
                 unparkSuccessor(h);
             return true;
         }
