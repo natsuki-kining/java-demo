@@ -37,7 +37,6 @@ package com.natsuki_kining.java.util.concurrent.locks;
 
 import java.util.Collection;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.Condition;
 
 /**
  * A reentrant mutual exclusion {@link Lock} with the same basic

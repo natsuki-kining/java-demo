@@ -35,7 +35,6 @@
 
 package com.natsuki_kining.java.util.concurrent.locks;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.Condition;
 
 /**
  * {@code Lock} implementations provide more extensive locking
