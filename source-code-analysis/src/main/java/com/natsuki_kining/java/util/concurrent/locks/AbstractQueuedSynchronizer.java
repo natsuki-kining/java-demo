@@ -736,6 +736,13 @@ public abstract class AbstractQueuedSynchronizer
      * propagation. (Note: For exclusive mode, release just amounts
      * to calling unparkSuccessor of head if it needs signal.)
      */
+    /**
+     * 共享锁的释放和独占锁的释放有一定的差别，前面唤醒锁的逻辑和独占锁是一样，
+     * 先判断头结点是不是SIGNAL状态，如果是，则修改为0，并且唤醒头结点的下一个节点
+     *
+     * 标识为PROPAGATE状态的节点，是共享锁模式下的节点状态，
+     * 处于这个状态下的节点，会对线程的唤醒进行传播
+     */
     private void doReleaseShared() {
         /*
          * Ensure that a release propagates, even if there are other
@@ -758,9 +765,18 @@ public abstract class AbstractQueuedSynchronizer
                     unparkSuccessor(h);
                 }
                 else if (ws == 0 &&
-                         !compareAndSetWaitStatus(h, 0, Node.PROPAGATE))
+                         !compareAndSetWaitStatus(h, 0, Node.PROPAGATE))         // 这个CAS失败的场景是：执行到这里的时候，刚好有一个节点入队，入队会将这个ws设置为 -1
                     continue;                // loop on failed CAS
             }
+            /**
+             * 如果到这里的时候，前面唤醒的线程已经占领了 head，那么再循环
+             * 通过检查头节点是否改变了，如果改变了就继续循环
+             *
+             * h == head：说明头节点还没有被刚刚用
+             * unparkSuccessor 唤醒的线程（这里可以理解为ThreadB）占有，此时 break 退出循环。
+             * h != head：头节点被刚刚唤醒的线程（这里可以理解为ThreadB）占有，那么这里重新进入下一轮循环，唤醒下一个节点（这里是 ThreadB ）。
+             * 我们知道，等到ThreadB 被唤醒后，其实是会主动唤醒 ThreadC...
+             */
             if (h == head)                   // loop if head changed
                 break;
         }
@@ -1083,22 +1099,28 @@ public abstract class AbstractQueuedSynchronizer
      * Acquires in shared interruptible mode.
      * @param arg the acquire argument
      */
+    /**
+     * 1. addWaiter 设置为 shared 模式。
+     * 2. tryAcquire 和 tryAcquireShared 的返回值不同，因此会多出一个判断过程
+     * 3. 在判断前驱节点是头节点后，调用了setHeadAndPropagate方法，而不是简单的更新一下头节点。
+     */
     private void doAcquireSharedInterruptibly(int arg)
         throws InterruptedException {
-        final Node node = addWaiter(Node.SHARED);
+        final Node node = addWaiter(Node.SHARED);       //创建一个共享模式的节点添加到队列中
         boolean failed = true;
         try {
             for (;;) {
                 final Node p = node.predecessor();
                 if (p == head) {
-                    int r = tryAcquireShared(arg);
-                    if (r >= 0) {
+                    int r = tryAcquireShared(arg);      //尝试获取锁
+                    if (r >= 0) {                       //r>=0 表示获取到了执行权限，这个时候因为 state!=0，所以不会执行这段代码
                         setHeadAndPropagate(node, r);
                         p.next = null; // help GC
                         failed = false;
                         return;
                     }
                 }
+                //阻塞线程
                 if (shouldParkAfterFailedAcquire(p, node) &&
                     parkAndCheckInterrupt())
                     throw new InterruptedException();
@@ -1423,7 +1445,7 @@ public abstract class AbstractQueuedSynchronizer
             throws InterruptedException {
         if (Thread.interrupted())
             throw new InterruptedException();
-        if (tryAcquireShared(arg) < 0)
+        if (tryAcquireShared(arg) < 0)          //state 如果不等于 0，说明当前线程需要加入到共享锁队列中
             doAcquireSharedInterruptibly(arg);
     }
 
@@ -1459,6 +1481,10 @@ public abstract class AbstractQueuedSynchronizer
      *        {@link #tryReleaseShared} but is otherwise uninterpreted
      *        and can represent anything you like.
      * @return the value returned from {@link #tryReleaseShared}
+     */
+    /**
+     * 1. 只有当 state 减为 0 的时候，tryReleaseShared 才返回 true, 否则只是简单的 state = state - 1
+     * 2. 如果 state=0, 则调用 doReleaseShared唤醒处于 await 状态下的线程
      */
     public final boolean releaseShared(int arg) {
         if (tryReleaseShared(arg)) {

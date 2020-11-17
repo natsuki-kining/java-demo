@@ -1,9 +1,8 @@
 package com.natsuki_kining.java.test;
 
+import com.natsuki_kining.java.util.concurrent.CountDownLatch;
 import com.natsuki_kining.java.util.concurrent.locks.Condition;
 import com.natsuki_kining.java.util.concurrent.locks.ReentrantLock;
-
-import java.util.concurrent.CountDownLatch;
 
 /**
  * TODO

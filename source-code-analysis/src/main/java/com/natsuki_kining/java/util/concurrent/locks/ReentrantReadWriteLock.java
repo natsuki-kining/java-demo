@@ -37,7 +37,6 @@ package com.natsuki_kining.java.util.concurrent.locks;
 
 import java.util.Collection;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.Condition;
 
 /**
  * An implementation of {@link ReadWriteLock} supporting similar
