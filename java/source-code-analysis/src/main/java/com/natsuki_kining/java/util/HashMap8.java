@@ -1,5 +1,7 @@
 package com.natsuki_kining.java.util;
 
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Objects;
 
@@ -122,10 +124,44 @@ public class HashMap8<K,V> extends AbstractMap<K,V> implements Map<K,V> {
         }
 
         final HashMap8.TreeNode<K,V> getTreeNode(int h, Object k) {
+            //从根节点开始查找
             return ((parent != null) ? root() : this).find(h, k, null);
         }
 
-        private TreeNode<K,V> find(int h, Object k, Object o) {
+        final HashMap8.TreeNode<K,V> find(int h, Object k, Class<?> kc) {
+            //root方法中把this设置为了根节点
+            HashMap8.TreeNode<K,V> p = this;
+            do {
+                int ph, dir;//当前节点的hash值，dir
+                K pk;
+                HashMap8.TreeNode<K,V> pl = p.left, pr = p.right, q;
+                if ((ph = p.hash) > h) {
+                    //当前的hash值大于查找节点的hash值，则说明要找的在左节点
+                    p = pl;
+                }else if (ph < h) {
+                    //当前的hash值小于查找节点的hash值，则说明要找的在右节点
+                    p = pr;
+                }else if ((pk = p.key) == k || (k != null && k.equals(pk))) {
+                    //如果key相同，则直接返回当前节点
+                    return p;
+                }else if (pl == null) {
+                    //左树为空，就去查右树
+                    p = pr;
+                }else if (pr == null) {
+                    //右树为空，就去查左树
+                    p = pl;
+                }else if ((kc != null ||  //getTreeNode方法传过来的是null
+                        //如果key实现了Comparable接口
+                        (kc = comparableClassFor(k)) != null) &&
+                        //
+                        (dir = compareComparables(kc, k, pk)) != 0) {
+                    p = (dir < 0) ? pl : pr;
+                }else if ((q = pr.find(h, k, kc)) != null) {
+                    return q;
+                }else {
+                    p = pl;
+                }
+            } while (p != null);
             return null;
         }
 
@@ -141,6 +177,33 @@ public class HashMap8<K,V> extends AbstractMap<K,V> implements Map<K,V> {
         final HashMap8.TreeNode<K,V> putTreeVal(HashMap8<K,V> map, HashMap8.Node<K,V>[] tab,int h, K k, V v) {
             return null;
         }
+    }
+
+    static Class<?> comparableClassFor(Object x) {
+        //如果实现了Comparable接口
+        if (x instanceof Comparable) {
+            Class<?> c; Type[] ts, as; Type t; ParameterizedType p;
+            if ((c = x.getClass()) == String.class) {
+                return c;
+            }
+            if ((ts = c.getGenericInterfaces()) != null) {
+                for (int i = 0; i < ts.length; ++i) {
+                    if (((t = ts[i]) instanceof ParameterizedType) &&
+                            ((p = (ParameterizedType)t).getRawType() ==
+                                    Comparable.class) &&
+                            (as = p.getActualTypeArguments()) != null &&
+                            as.length == 1 && as[0] == c) {
+                        return c;
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    @SuppressWarnings({"rawtypes","unchecked"})
+    static int compareComparables(Class<?> kc, Object k, Object x) {
+        return (x == null || x.getClass() != kc ? 0 : ((Comparable)k).compareTo(x));
     }
 
     /**
@@ -285,19 +348,27 @@ public class HashMap8<K,V> extends AbstractMap<K,V> implements Map<K,V> {
     }
 
     final HashMap8.Node<K,V> getNode(int hash, Object key) {
-        HashMap8.Node<K,V>[] tab; HashMap8.Node<K,V> first, e; int n; K k;
-        if ((tab = table) != null && (n = tab.length) > 0 &&
-                (first = tab[(n - 1) & hash]) != null) {
-            if (first.hash == hash &&
-                    ((k = first.key) == key || (key != null && key.equals(k))))
+        HashMap8.Node<K,V>[] tab; //数组
+        HashMap8.Node<K,V> first, e;
+        int n; //数组长度
+        K k;
+        //如果数组不为空，并且根据hash指向的数组元素也不为空
+        if ((tab = table) != null && (n = tab.length) > 0 && (first = tab[(n - 1) & hash]) != null) {
+            //如果是数组的第一个元素，则直接返回
+            if (first.hash == hash && ((k = first.key) == key || (key != null && key.equals(k)))) {
                 return first;
+            }
+            //判断是否还有下级
             if ((e = first.next) != null) {
-                if (first instanceof HashMap8.TreeNode)
-                    return ((HashMap8.TreeNode<K,V>)first).getTreeNode(hash, key);
+                //如果是树节点，则进入树节点查找算法
+                if (first instanceof HashMap8.TreeNode) {
+                    return ((HashMap8.TreeNode<K, V>) first).getTreeNode(hash, key);
+                }
+                //循环链表，找到则直接返回
                 do {
-                    if (e.hash == hash &&
-                            ((k = e.key) == key || (key != null && key.equals(k))))
+                    if (e.hash == hash && ((k = e.key) == key || (key != null && key.equals(k)))) {
                         return e;
+                    }
                 } while ((e = e.next) != null);
             }
         }
