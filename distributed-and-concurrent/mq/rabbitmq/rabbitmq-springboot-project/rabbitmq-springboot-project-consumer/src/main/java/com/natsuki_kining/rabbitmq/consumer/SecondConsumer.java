@@ -15,7 +15,7 @@ import java.io.IOException;
  */
 @Component
 @PropertySource("classpath:rabbitmq.properties")
-@RabbitListener(queues = "${com.gupao.secondqueue}", containerFactory="rabbitListenerContainerFactory")
+@RabbitListener(queues = "${com.gupaoedu.secondqueue}", containerFactory="rabbitListenerContainerFactory")
 public class SecondConsumer {
     @RabbitHandler
     public void process(String msgContent,Channel channel, Message message) throws IOException {

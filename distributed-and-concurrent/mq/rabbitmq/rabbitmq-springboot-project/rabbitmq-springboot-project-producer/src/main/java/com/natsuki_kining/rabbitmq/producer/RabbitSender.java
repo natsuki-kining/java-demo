@@ -17,22 +17,22 @@ import org.springframework.stereotype.Component;
 @PropertySource("classpath:rabbitmq.properties")
 public class RabbitSender {
 
-    @Value("${com.gupao.directexchange}")
+    @Value("${com.gupaoedu.directexchange}")
     private String directExchange;
 
-    @Value("${com.gupao.topicexchange}")
+    @Value("${com.gupaoedu.topicexchange}")
     private String topicExchange;
 
-    @Value("${com.com.gupaoedu.fanoutexchange}")
+    @Value("${com.gupaoedu.fanoutexchange}")
     private String fanoutExchange;
 
-    @Value("${com.com.gupaoedu.directroutingkey}")
+    @Value("${com.gupaoedu.directroutingkey}")
     private String directRoutingKey;
 
-    @Value("${com.com.gupaoedu.topicroutingkey1}")
+    @Value("${com.gupaoedu.topicroutingkey1}")
     private String topicRoutingKey1;
 
-    @Value("${com.com.gupaoedu.topicroutingkey2}")
+    @Value("${com.gupaoedu.topicroutingkey2}")
     private String topicRoutingKey2;
 
 

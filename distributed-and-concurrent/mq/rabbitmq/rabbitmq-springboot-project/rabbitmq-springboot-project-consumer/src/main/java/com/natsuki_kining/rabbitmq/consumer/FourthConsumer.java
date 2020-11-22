@@ -13,7 +13,7 @@ import java.io.IOException;
  */
 @Component
 @PropertySource("classpath:rabbitmq.properties")
-@RabbitListener(queues = "${com.gupao.fourthqueue}", containerFactory="rabbitListenerContainerFactory")
+@RabbitListener(queues = "${com.gupaoedu.fourthqueue}", containerFactory="rabbitListenerContainerFactory")
 public class FourthConsumer {
     @RabbitHandler
     public void process(String message) throws IOException {

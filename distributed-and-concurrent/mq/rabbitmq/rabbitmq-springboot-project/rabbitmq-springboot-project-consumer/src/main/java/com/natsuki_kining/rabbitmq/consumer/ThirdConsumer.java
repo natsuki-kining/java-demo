@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @PropertySource("classpath:rabbitmq.properties")
-@RabbitListener(queues = "${com.gupao.thirdqueue}", containerFactory="rabbitListenerContainerFactory")
+@RabbitListener(queues = "${com.gupaoedu.thirdqueue}", containerFactory="rabbitListenerContainerFactory")
 public class ThirdConsumer {
     @RabbitHandler
     public void process(String msg){
