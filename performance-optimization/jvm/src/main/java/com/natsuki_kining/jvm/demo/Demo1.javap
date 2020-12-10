@@ -1,0 +1,15 @@
+Compiled from "Demo1.java"
+public class com.natsuki_kining.jvm.demo.Demo1 {
+  int a;
+  protected int c;
+  public int d;
+  static int e;
+  static final int g;
+  java.lang.String str;
+  public com.natsuki_kining.jvm.demo.Demo1();
+  public static void staticMethod();
+  public void method();
+  public void method(java.lang.String, int);
+  public static void main(java.lang.String[]);
+  static {};
+}
