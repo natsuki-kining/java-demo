@@ -1,4 +1,4 @@
-package com.natsuki_kining.jvm.demo;
+package com.natsuki_kining.jvm.demo1;
 
 /**
  * TODO
