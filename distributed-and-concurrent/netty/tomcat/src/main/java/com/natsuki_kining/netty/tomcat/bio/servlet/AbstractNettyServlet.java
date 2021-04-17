@@ -1,7 +1,7 @@
-package com.natsuki_kining.netty.servlet;
+package com.natsuki_kining.netty.tomcat.bio.servlet;
 
-import com.natsuki_kining.netty.http.NettyRequest;
-import com.natsuki_kining.netty.http.NettyResponse;
+import com.natsuki_kining.netty.tomcat.bio.http.NettyRequest;
+import com.natsuki_kining.netty.tomcat.bio.http.NettyResponse;
 
 /**
  * TODO
